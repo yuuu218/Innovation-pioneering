@@ -1,0 +1,73 @@
+/*
+report on the application of this deduce technique in Ethereum with ECDSA——从签名中解析公钥技术在以太坊中的应用
+***本题需了解以太坊相关知识，文字叙述较多。
+一、	账户、地址、私钥和公钥
+  账户扮演着以太坊的中心角色，地址是我们与以太坊系统进行交互的标识，它是以太坊账户与外界进行交互的名字，而私钥与公钥是保护我们账户安全的重要屏障。
+  大体来说，地址的生成的流程是：私钥 -> 公钥 -> 地址。
+二、	以太坊的交易流程
+（1）发起交易：指定目标地址和交易金额，以及必需的gas/gasLimit
+（2）交易签名：使用账户私钥对交易进行签名。和比特币一样，也是先对交易本身求hash，再进行签名
+（3）提交交易：验签交易，并将交易提交到交易缓冲池
+（4）广播交易：通知以太坊虚拟机吧交易信息广播给其他节点
+三、以太坊的一个交易到打包的流程
+（1）TxPool从网络上接收到一个交易，发送TxPreEvent事件。
+（2）worker在接收到TxPreEvent事件后，调用update->commitTransactions提交目前收到的交易。
+（3）Work中的commitTransaction负责调用EVM虚拟机执行交易，并返回给Work有关此次交易的Receipt（执行列表）。
+（4）Miner调用Work的commitNewWork，从交易列表中选择交易，组装区块结构。
+（5）Work调用CpuAgent，完成POW工作量证明（打包）。
+（6）一旦区块打包成功，worker广播NewMinedBlockEvent事件。
+四、从签名推导公钥
+签名后的交易发送到以太坊节点后，节点需要从签名交易中还原出公钥(从公钥中单向计算出账号地址)，进而将交易放入交易池中。
+*/
+#include "sm2_qianming.c"
+#include "SHA256.h"
+#include"iostream"
+#include "math.h"
+using namespace std;
+long s, r, n, e, Pa[2] = { 0,0 }, da, kG[2] = { 0,0 }, G[2] = { 0,0 }, a, b;
+string Za_M;
+long gcd(long a, long b)
+{
+	while (a != b)
+	{
+		if (a > b)
+		{
+			a = a - b;
+		}
+		else
+		{
+			b = b - a;
+		}
+	}
+	return a;
+}
+long ExGcd(long a, long b, long& x, long& y) {
+	if (!b)
+	{
+		x = 1;
+		y = 0;
+		return a;
+	}
+	long ans = ExGcd(b, a % b, x, y);
+	long temp = x;
+	x = y;
+	y = temp - a / b * y;
+	return ans;
+}
+long getInverse(long a, long p)//a模n的乘法逆元
+{
+	if (gcd(a, p) != 1)
+		return -1;
+	long x, y;
+	ExGcd(a, p, x, y);
+	return (x + p) % p;
+}
+int main() 
+{
+	sm2_qianming(r, s);
+	e = SHA256(Za_M);
+	kG[0] = (r - e) % n;
+	kG[1] = sqrt(kG[0] * kG[0] * kG[0] + a * kG[0] + b);
+	Pa[0] = getInverse(s + r, n)*(kG[0]-s*G[0]);
+	Pa[1] = getInverse(s + r, n) * (kG[1] - s * G[1]);
+}
