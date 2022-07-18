@@ -1,0 +1,86 @@
+/*k的泄露导致d的泄露*/
+/*ECDSA*
+s=k^(-1)(e+dr)
+kG=(x,y)
+r=x mod n
+/
+long gcd(long a, long b)
+{
+	while (a != b)
+	{
+		if (a > b)
+		{
+			a = a - b;
+		}
+		else
+		{
+			b = b - a;
+		}
+	}
+	return a;
+}
+long ExGcd(long a, long b, long& x, long& y) {
+	if (!b)
+	{
+		x = 1;
+		y = 0;
+		return a;
+	}
+	long ans = ExGcd(b, a % b, x, y);
+	long temp = x;
+	x = y;
+	y = temp - a / b * y;
+	return ans;
+}
+long getInverse(long a, long p)//a模n的乘法逆元
+{
+	if (gcd(a, p) != 1)
+		return -1;
+	long x, y;
+	ExGcd(a, p, x, y);
+	return (x + p) % p;
+}
+k*G[0]=x;
+k*G[1]=y;
+r=x%n;
+d=((k*s-e)*getInverse(r,n))%n;
+
+/*Schnorr*
+d=(s-k)Hash(m||R)^(-1)
+R=eG=x,y
+/
+R[0]=e*G[0];
+R[1]=e*G[1];
+d=((s-k)*getInverse(SHA256(m_R),n))%n;
+
+/*SM2*
+d=(k-s)(s+r)^(-1)
+r=(e+x)
+kG=(x,y)
+/
+k*G[0]=x;
+r=(e+x)%n;
+d=((k-s)*getInverse(s+r))%n;
+
+
+/*k的重用导致d的泄露*/
+/*ECDSA*
+s1*k=(e+d*r1)
+s2*k=(e+d*r2)
+=>d=(e*s2-e*s1)/(r2*s1-r1*s2,n)
+/
+d=((e*s2-e*s1)*getInverse(r2*s1-r1*s2,n))%n;
+
+/*Schnorr
+d*Hash(m1||R)=s1-k;
+d*Hash(m2||R)=s2-k;
+=>d=(s1-s2)/(Hash(m1||R)-Hash(m2||R))
+*/
+d=(s1-s2)*getInverse((Hash(m1||R)-Hash(m2||R),n)%n;
+
+/*SM2
+s1(1+d)=k-r1*d
+s2(1+d)=k-r2*d
+=>d=(s2-s1)/(s1-s2+r1-r2)
+*/
+d=((s2-s1)*getInverse(s1-s2+r1-r2,n))%n;
