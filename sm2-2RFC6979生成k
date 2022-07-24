@@ -1,0 +1,34 @@
+/*比特币的签名机制是基于椭圆曲线算法。在椭圆曲线里面k值(用于签名)是要严格保密的，暴露k值就相当于暴露私钥。k值要保证两点：
+1、保密
+2、唯一
+RFC6979确定性签名算法就实现了以上两点，它的机制类似于：k = SHA256(d + HASH(m)); 其中，d是私钥，m是消息，我们一般会对消息的HASH进行签名，因此这里是HASH(m)。
+有私钥d，就保证了“保密”，再加上消息m，保证了“唯一”，这也是“确定性”的算法，只要SHA256是安全的，此算法就是安全的。
+当然真正的RFC6979比这个要复杂的多。其实现为：
+首先我们定义:HMAC_K(V)
+1使用密钥(key)K对数据V进行HMAC算法：给定输入消息m，应用以下过程：通过哈希函数H处理m，产生：h1 = H（m）
+2.V = 0x01 0x01 0x01 ... 0x01。V（以比特）的长度等于8 * ceil（hlen / 8）。例如，如果H是SHA-256，则V被设置为值为1的32个八位字节的序列。
+3.K = 0x00 0x00 0x00 ... 0x00。K的长度（以比特）等于8 * ceil（hlen / 8）。
+4.K = HMAC_K（V || 0x00 || int2octets（x）|| bits2octets（h1））。x是私钥。
+5.V = HMAC_K（V）
+6.K = HMAC_K（V || 0x01 || int2octets（x）|| bits2octets（h1））
+7.V = HMAC_K（V）
+执行以下流程，直到找到适当的值k：
+将T设置为空序列。 T的长度（以比特为单位）表示为tlen, 因此tlen = 0。
+当tlen
+V = HMAC_K（V）
+T = T || V
+计算k = bits2int（T），如果k的值在[1，q-1]范围内，那么k的生成就完了。否则，计算：
+K = HMAC_K（V || 0x00）
+V = HMAC_K（V）
+并循环（尝试生成一个新的T，等等）。
+代码实现为：*/
+def deterministic_generate_k(msghash, priv):
+    v = b'\x01' * 32
+    k = b'\x00' * 32
+    priv = encode_privkey(priv, 'bin')
+    msghash = encode(hash_to_int(msghash), 256, 32)
+    k = hmac.new(k, v+b'\x00'+priv+msghash, hashlib.sha256).digest()
+    v = hmac.new(k, v, hashlib.sha256).digest()
+    k = hmac.new(k, v+b'\x01'+priv+msghash, hashlib.sha256).digest()
+    v = hmac.new(k, v, hashlib.sha256).digest()
+    return decode(hmac.new(k, v, hashlib.sha256).digest(), 256)
