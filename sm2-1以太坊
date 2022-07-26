@@ -19,55 +19,35 @@ report on the application of this deduce technique in Ethereum with ECDSA——�
 四、从签名推导公钥
 签名后的交易发送到以太坊节点后，节点需要从签名交易中还原出公钥(从公钥中单向计算出账号地址)，进而将交易放入交易池中。
 */
-#include "sm2_qianming.c"
-#include "SHA256.h"
-#include"iostream"
-#include "math.h"
-using namespace std;
-long s, r, n, e, Pa[2] = { 0,0 }, da, kG[2] = { 0,0 }, G[2] = { 0,0 }, a, b;
-string Za_M;
-long gcd(long a, long b)
-{
-	while (a != b)
-	{
-		if (a > b)
-		{
-			a = a - b;
-		}
-		else
-		{
-			b = b - a;
-		}
-	}
-	return a;
-}
-long ExGcd(long a, long b, long& x, long& y) {
-	if (!b)
-	{
-		x = 1;
-		y = 0;
-		return a;
-	}
-	long ans = ExGcd(b, a % b, x, y);
-	long temp = x;
-	x = y;
-	y = temp - a / b * y;
-	return ans;
-}
-long getInverse(long a, long p)//a模n的乘法逆元
-{
-	if (gcd(a, p) != 1)
-		return -1;
-	long x, y;
-	ExGcd(a, p, x, y);
-	return (x + p) % p;
-}
-int main() 
-{
-	sm2_qianming(r, s);
-	e = SHA256(Za_M);
-	kG[0] = (r - e) % n;
-	kG[1] = sqrt(kG[0] * kG[0] * kG[0] + a * kG[0] + b);
-	Pa[0] = getInverse(s + r, n)*(kG[0]-s*G[0]);
-	Pa[1] = getInverse(s + r, n) * (kG[1] - s * G[1]);
-}
+def pk_fron_signature():
+    IDA = 'ALICE123@YAHOO.COM'
+    M = 'message digest'
+    dA = 0x128B2FA8BD433C6C068C8D803DFF79792A519A55171B1B650C23661D15897263
+    xA = 0x0AE4C7798AA0F119471BEE11825BE46202BB79E2A5844495E97C04FF4DF2548A
+    yA = 0x7C0240F88F1CD4E16352A73C17B7F16F07353E53A176D684A9FE0C6BB798E857
+    PA = (xA, yA)
+    k = 0x6CB28D99385C175C94F94E934817663FC176D925DD72B727260DBAAE1FB2F96F
+    n = 0x8542D69E4C044F18E8B92435BF6FF7DD297720630485628D5AE74EE7C32E79B7
+    a = 0x787968B4FA32C3FD2417842E73BBFEFF2F3C848B6831D7E0EC65228B3937E498
+    b = 0x63E4C6D3B23B0C849CF84241484BFE48F61D59A5B16BA06E6E12D1DA27C5249A
+    xG = 0x421DEBD61B62EAB6746434EBC3CC315E32220B3BADD50BDC4C4E6C147FEDD43D
+    yG = 0x0680512BCBB42C07D47349D2153B70C4E5D7FDFCBFA36EA1A85841B9E46E09A2
+    G=(xG,yG)
+    sm2_A = SM2(*demo_para(), IDA, dA, PA)
+    sm2_B = SM2(*demo_para())
+    # A、B双方初始化
+    # A对消息M进行签名
+    r,s,e = sm2_A.sign(M, k,0,)
+    # A将消息M签名(r, s)发送给B
+    xA1 = 0x0
+    yA1 = 0x0
+    x1 = (r- e) % n;
+    #y1 = pow((x1 * x1 * x1 + a * x1 + b)%n,0.5);
+    y1=12844692015861483985796897070387313459524129685989174230708833771946472557082
+    kG = (x1, y1)
+    fan = sm2_A.minus(sm2_A.Jacb_multiply(s, G))
+    xA1, yA1 = sm2_A.Jacb_multiply(get_inverse(r + s, n), sm2_A.add(kG, fan));
+    xA1=hex(xA1);
+    yA1 = hex(yA1);
+    PA1 = (xA1, yA1)
+    print("公钥为",PA1)
