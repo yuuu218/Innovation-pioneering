@@ -1,0 +1,358 @@
+我们继续对以太坊MPT树的实现源码进行简单的解析。
+一．commiter.go
+该文件提供了向内存数据库提交修改后的MPT树（键值对的形式）的方法。
+我们首先查看committer对象的定义：
+// leaf represents a trie leaf value
+type leaf struct {
+	size int         // size of the rlp data (estimate)
+	hash common.Hash // hash of rlp data
+	node node        // the node to commit
+}
+
+// committer is a type used for the trie Commit operation. A committer has some
+// internal preallocated temp space, and also a callback that is invoked when
+// leaves are committed. The leafs are passed through the `leafCh`,  to allow
+// some level of parallelism.
+// By 'some level' of parallelism, it's still the case that all leaves will be
+// processed sequentially - onleaf will never be called in parallel or out of order.
+type committer struct {
+	tmp sliceBuffer
+	sha crypto.KeccakState
+
+	onleaf LeafCallback
+	leafCh chan *leaf
+}
+其中，字段onleaf是一个回调函数，这个字段的作用是当访问到一颗树的叶子节点是，对相应的叶子节点调用回调函数（叶子节点记录了键值对中的值，调用回调函数可以最终把值记录到数据库中）；leafCh是一个*leaf的管道，leaf结构体记录了当前节点的RLP编码大小（包括其所有子孙的编码），哈希，以及当前节点。
+其中主要方法Commit()的内容如下：
+// commit collapses a node down into a hash node and inserts it into the database
+func (c *committer) Commit(n node, db *Database) (hashNode, error) {
+	...
+	h, err := c.commit(n, db)
+	...
+	return h.(hashNode), nil
+}
+
+// commit collapses a node down into a hash node and inserts it into the database
+func (c *committer) commit(n node, db *Database) (node, error) {
+	// if this path is clean, use available cached data
+	hash, dirty := n.cache()
+	if hash != nil && !dirty {
+		return hash, nil
+	}
+	// Commit children, then parent, and remove remove the dirty flag.
+	switch cn := n.(type) {
+	case *shortNode:
+		// Commit child
+		collapsed := cn.copy()
+
+		// If the child is fullnode, recursively commit.
+		// Otherwise it can only be hashNode or valueNode.
+		if _, ok := cn.Val.(*fullNode); ok {
+			childV, err := c.commit(cn.Val, db)
+			if err != nil {
+				return nil, err
+			}
+			collapsed.Val = childV
+		}
+		// The key needs to be copied, since we're delivering it to database
+		collapsed.Key = hexToCompact(cn.Key)
+		hashedNode := c.store(collapsed, db)
+		if hn, ok := hashedNode.(hashNode); ok {
+			return hn, nil
+		}
+		return collapsed, nil
+	case *fullNode:
+		hashedKids, err := c.commitChildren(cn, db)
+		if err != nil {
+			return nil, err
+		}
+		collapsed := cn.copy()
+		collapsed.Children = hashedKids
+
+		hashedNode := c.store(collapsed, db)
+		if hn, ok := hashedNode.(hashNode); ok {
+			return hn, nil
+		}
+		return collapsed, nil
+	case hashNode:
+		return cn, nil
+	default:
+		// nil, valuenode shouldn't be committed
+		panic(fmt.Sprintf("%T: invalid node: %v", n, n))
+	}
+}
+其中函数commit()的执行流程如下：
+(1)如果当前节点的哈希值已经被缓存且当前节点未被修改过（dirty），则直接返回。
+(2)否则，如果当前节点是shortNode，那么判断当前节点的孩子类型（其孩子只可能是fullNode或者hashNode、valueNode）。如果孩子是fullNode，则对其孩子节点递归调用commit()，最终孩子节点的类型会被转化为hashNode。最后对当前节点进行存储。
+(3)如果当前节点是fullNode，则调用commitChildren()，它的作用是对所有的孩子节点递归调用commit()（如果孩子节点不是hashNode或valueNode的话）。在调用结束后，孩子节点的类型会被转化为hashNode，最后一个孩子节点数valueNode或者nil。最后对当前节点存储。
+可以发现，函数commit()在调用过程中是存在递归嵌套的，因为，如果当前节点的孩子节点是shortNode或者fullNode的话，还需要对它的孩子调用该函数，最后以hashNode的形式返回对应的孩子节点。
+此外，在对节点存储过程中，会调用store()函数，其定义如下：
+// store hashes the node n and if we have a storage layer specified, it writes
+// the key/value pair to it and tracks any node->child references as well as any
+// node->external trie references.
+func (c *committer) store(n node, db *Database) node {
+	// Larger nodes are replaced by their hash and stored in the database.
+	var (
+		hash, _ = n.cache()
+		size    int
+	)
+	if hash == nil {
+		// This was not generated - must be a small node stored in the parent.
+		// In theory we should apply the leafCall here if it's not nil(embedded
+		// node usually contains value). But small value(less than 32bytes) is
+		// not our target.
+		return n
+	} else {
+		// We have the hash already, estimate the RLP encoding-size of the node.
+		// The size is used for mem tracking, does not need to be exact
+		size = estimateSize(n)
+	}
+	// If we're using channel-based leaf-reporting, send to channel.
+	// The leaf channel will be active only when there an active leaf-callback
+	if c.leafCh != nil {
+		c.leafCh <- &leaf{
+			size: size,
+			hash: common.BytesToHash(hash),
+			node: n,
+		}
+	} else if db != nil {
+		// No leaf-callback used, but there's still a database. Do serial
+		// insertion
+		db.lock.Lock()
+		db.insert(common.BytesToHash(hash), size, n)
+		db.lock.Unlock()
+	}
+	return hash
+}
+store()函数会检查leafCh是否被打开，如果打开，则向leafCh中写入输入；如果未打开，则检查是否存在状态数据库对象db，如果存在，则直接调用其insert()方法插入数据。
+leafCh中的数据最终会在commitLoop中被不断读取，并插入到数据库当中：
+// commitLoop does the actual insert + leaf callback for nodes.
+func (c *committer) commitLoop(db *Database) {
+	for item := range c.leafCh {
+		var (
+			hash = item.hash
+			size = item.size
+			n    = item.node
+		)
+		// We are pooling the trie nodes into an intermediate memory cache
+		db.lock.Lock()
+		db.insert(hash, size, n)
+		db.lock.Unlock()
+
+		if c.onleaf != nil {
+			switch n := n.(type) {
+			case *shortNode:
+				if child, ok := n.Val.(valueNode); ok {
+					c.onleaf(nil, child, hash)
+				}
+			case *fullNode:
+				// For children in range [0, 15], it's impossible
+				// to contain valuenode. Only check the 17th child.
+				if n.Children[16] != nil {
+					c.onleaf(nil, n.Children[16].(valueNode), hash)
+				}
+			}
+		}
+	}
+}
+这个函数同样调用了insert方法向数据库中插入数据。同时，如果回调函数onleaf存在的话，会对所有的valueNode节点调用相应的回调函数。
+二．database.go
+这个文件实现了对内存中的MPT树节点进行引用计数，当引用计数为时，从内存中删除此节点。
+首先，我们对Database对象进行介绍：
+// Database is an intermediate write layer between the trie data structures and
+// the disk database. The aim is to accumulate trie writes in-memory and only
+// periodically flush a couple tries to disk, garbage collecting the remainder.
+//
+// Note, the trie Database is **not** thread safe in its mutations, but it **is**
+// thread safe in providing individual, independent node access. The rationale
+// behind this split design is to provide read access to RPC handlers and sync
+// servers even while the trie is executing expensive garbage collection.
+type Database struct {
+	diskdb ethdb.KeyValueStore // Persistent storage for matured trie nodes
+
+	cleans  *fastcache.Cache            // GC friendly memory cache of clean node RLPs
+	dirties map[common.Hash]*cachedNode // Data and references relationships of dirty trie nodes
+	oldest  common.Hash                 // Oldest tracked node, flush-list head
+	newest  common.Hash                 // Newest tracked node, flush-list tail
+
+	preimages map[common.Hash][]byte // Preimages of nodes from the secure trie
+
+	gctime  time.Duration      // Time spent on garbage collection since last commit
+	gcnodes uint64             // Nodes garbage collected since last commit
+	gcsize  common.StorageSize // Data storage garbage collected since last commit
+
+	flushtime  time.Duration      // Time spent on data flushing since last commit
+	flushnodes uint64             // Nodes flushed since last commit
+	flushsize  common.StorageSize // Data storage flushed since last commit
+
+	dirtiesSize   common.StorageSize // Storage size of the dirty node cache (exc. metadata)
+	childrenSize  common.StorageSize // Storage size of the external children tracking
+	preimagesSize common.StorageSize // Storage size of the preimages cache
+
+	lock sync.RWMutex
+}
+其实，这里的Database对象（内存数据库和磁盘数据库不太一样）只是充当内存中的MPT树以及磁盘中的数据库的一个中间层，数据在磁盘中是以键值对的形式存储的（磁盘中是没有数据结构的），最终将内存中的MPT树转化为键值对存储在磁盘中是由ethdb.KeyValueStore对象实现的。另外，我们还需要注意到其中的两个字段，分别是dirties以及preimages。
+preimages提供了从哈希到原字节串的映射，我们前面提到的安全MPT树就需要借助这个字段（安全MPT树的键是原字节串经过哈希得到的结果），借助这个字段我们就可以从哈希值恢复原字节串，安全的MPT树具体实现位于文件secure_trie.go中，其主要的实现都是对原生的Trie树进行封装，因此我们不会过多介绍。
+dirties实现了对树节点的引用计数，它的类型是map[common.Hash]*cachedNode，其中comman.Hash代表节点的哈希，cachedNode的定义如下：
+// cachedNode is all the information we know about a single cached trie node
+// in the memory database write layer.
+type cachedNode struct {
+	node node   // Cached collapsed trie node, or raw rlp data
+	size uint16 // Byte size of the useful cached data
+
+	parents  uint32                 // Number of live nodes referencing this one
+	children map[common.Hash]uint16 // External children referenced by this node
+
+	flushPrev common.Hash // Previous node in the flush-list
+	flushNext common.Hash // Next node in the flush-list
+}
+在这个结构体中，parents和children实现了引用计数功能，它们分别表示引用当前节点的节点数量以及当前节点的子节点的引用计数。flushPrev和flushNext将当前节点加入到了flush-list链表，它们分别表示链表中前一个节点的哈希以及后一个节点的哈希。
+1.insert
+由于前面提到在Commit()函数中，最终都会调用insert()方法向数据库中插入数据，而insert()方法的定义位于database.go文件中。首先我们先观察insert()方法的定义：
+// insert inserts a collapsed trie node into the memory database.
+// The blob size must be specified to allow proper size tracking.
+// All nodes inserted by this function will be reference tracked
+// and in theory should only used for **trie nodes** insertion.
+func (db *Database) insert(hash common.Hash, size int, node node) {
+	// If the node's already cached, skip
+	if _, ok := db.dirties[hash]; ok {
+		return
+	}
+	memcacheDirtyWriteMeter.Mark(int64(size))
+
+	// Create the cached entry for this node
+	entry := &cachedNode{
+		node:      simplifyNode(node),
+		size:      uint16(size),
+		flushPrev: db.newest,
+	}
+	entry.forChilds(func(child common.Hash) {
+		if c := db.dirties[child]; c != nil {
+			c.parents++
+		}
+	})
+	db.dirties[hash] = entry
+
+	// Update the flush-list endpoints
+	if db.oldest == (common.Hash{}) {
+		db.oldest, db.newest = hash, hash
+	} else {
+		db.dirties[db.newest].flushNext, db.newest = hash, hash
+	}
+	db.dirtiesSize += common.StorageSize(common.HashLength + entry.size)
+}
+它的主要逻辑非常简单，就是构造一个新加入的cacheNode节点，然后增加所有子节点的引用计数parents字段。同时，它会修改flush-list链表。
+2.reference
+reference()方法实现了parent和child节点各自的引用计数，其定义如下：
+// reference is the private locked version of Reference.
+func (db *Database) reference(child common.Hash, parent common.Hash) {
+	// If the node does not exist, it's a node pulled from disk, skip
+	node, ok := db.dirties[child]
+	if !ok {
+		return
+	}
+	// If the reference already exists, only duplicate for roots
+	if db.dirties[parent].children == nil {
+		db.dirties[parent].children = make(map[common.Hash]uint16)
+		...
+	} else if _, ok = db.dirties[parent].children[child]; ok && parent != (common.Hash{}) {
+		return
+	}
+	node.parents++
+	db.dirties[parent].children[child]++
+	...
+}
+首先，如果child节点不在缓存中，则立即返回。如果parent节点的childeren字段不存在，则构造；否则，如果parent节点已经引用过child节点并且child节点不是根节点，那么则返回。最后增加child节点的引用计数以及parent节点的引用计数。
+那么，为什么当child节点为根节点时，即使已经引用过了该节点，还需要增加parent对child节点的计数呢？一般情况下，当父节点已经引用过某个子节点时，不再增加对子节点的引用是合理的，因为一个父节点只能引用某个特定的子节点一次，不存在引用多次的情况。
+但是，如果child参数是一个根节点，那么parent的值肯定是common.Hash{}，即common.Hash{}是任一trie树的根节点的父节点；所以这里判断parent是否是common.Hash{}，也就是在判断child参数是否是一个根节点。对根节点的引用与对普通节点引用的不同之处在于，普通节点的引用发生在trie树的内部，因此刚才说了，一个父节点只能引用某个特定的子节点 一次；而根节点是可以被trie树以外的地方引用的，比如在miner模块中引用了某个trie树的根节点，然后blockchain模块又对这个根节点引用了一次。所以这种情况不存在common.Hash{}只能引用某个根节点一次的情况。
+3.deference
+然后，我们再来看看deference()方法的主要内容：
+// dereference is the private locked version of Dereference.
+func (db *Database) dereference(child common.Hash, parent common.Hash) {
+	// Dereference the parent-child
+	node := db.dirties[parent]
+
+	if node.children != nil && node.children[child] > 0 {
+		node.children[child]--
+		if node.children[child] == 0 {
+			delete(node.children, child)
+			...
+		}
+	}
+	// If the child does not exist, it's a previously committed node.
+	node, ok := db.dirties[child]
+	if !ok {
+		return
+	}
+	// If there are no more references to the child, delete it and cascade
+	if node.parents > 0 {
+		...
+		node.parents--
+	}
+	if node.parents == 0 {
+		// Remove the node from the flush-list
+		switch child {
+		case db.oldest:
+			db.oldest = node.flushNext
+			db.dirties[node.flushNext].flushPrev = common.Hash{}
+		case db.newest:
+			db.newest = node.flushPrev
+			db.dirties[node.flushPrev].flushNext = common.Hash{}
+		default:
+			db.dirties[node.flushPrev].flushNext = node.flushNext
+			db.dirties[node.flushNext].flushPrev = node.flushPrev
+		}
+		// Dereference all children and delete the node
+		node.forChilds(func(hash common.Hash) {
+			db.dereference(hash, child)
+		})
+		delete(db.dirties, child)
+		...
+	}
+}
+这个方法首先解除parent对child节点的引用。然后，判断child节点是否被缓存，如果未被缓存，则直接返回；否则减少child节点的引用。最后，如果child节点减少引用后没有其他节点引用该child，则修改flush-list链表，同时递归解除所有子节点对child的引用。同时，需要注意的是，只有某个节点将要被删除时，才会解引用所有子节点，而不是解引用某个节点的同时也解引用所有子节。
+以太坊在进行区块的修剪时会调用Database.Reference和Database.Dereference两个方法。为了分析的完整一些，最后我们来看看修剪时的调用:
+func (bc *BlockChain) writeBlockWithState(block *types.Block, receipts []*types.Receipt, state *state.StateDB) (status WriteStatus, err error) {
+  ......
+  if bc.cacheConfig.Disabled {
+    ......  
+  } else {
+    triedb.Reference(root, common.Hash{}) // metadata reference to keep trie alive
+    ......
+
+      for !bc.triegc.Empty() {
+        ......
+        triedb.Dereference(root.(common.Hash))
+      }
+  }
+}
+这里先引用一整棵树，经过一些判断和处理，再找合适机会解引用这棵树。
+4.flush-list
+前面我们多次提到flush-list这个概念，flush-list是一个由节点构成的双向链表。flush-list在Database.Cap()方法中被使用，这个方法将缓存中的数据刷到真实的磁盘数据库中，直到缓存占用的内存量达到参数的要求（小于给定的限制）。flush-list则决定了在刷新缓存时，先刷哪个节点、最后刷哪个节点。
+我们来看一下Database.Cap()的主要内容：
+func (db *Database) Cap(limit common.StorageSize) error {
+  ......
+
+  oldest := db.oldest
+  for size > limit && oldest != (common.Hash{}) {
+    // Fetch the oldest referenced node and push into the batch
+    node := db.dirties[oldest]
+    if err := batch.Put(oldest[:], node.rlp()); err != nil {
+      db.lock.RUnlock()
+      return err
+    }
+
+    ......
+
+    size -= common.StorageSize(3*common.HashLength + int(node.size))
+    oldest = node.flushNext
+  }
+
+  ......
+}
+可以看到这是一个典型的链表的遍历，同时在链表遍历的过程中向磁盘数据库中写入节点同时清除缓存。
+
+参考文献：https://blog.csdn.net/qq_55179414/article/details/118935827
+本篇文章分析的源码地址为：https://github.com/ethereum/go-ethereum
+分支：master
+commit id: 257bfff316e4efb8952fbeb67c91f86af579cb0a
