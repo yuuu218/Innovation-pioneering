@@ -1,0 +1,256 @@
+MPT研究之源码解析(一)
+接下来我们对以太坊MPT树的实现源码进行简单的说明。
+encoding.go：实现了Hex编码和HP编码之间的转换，即byte和nibble之间的转换。
+node.go：定义了以太坊MPT树中的所有的节点类型。同时，它也提供了从RLP编码解析整个MPT树的方法。
+hasher.go：实现了从某个结点开始计算子树的哈希的功能（计算这个节点以及所有子孙的哈希）。可以说这个文件里的代码实现了以太坊的Trie的默克尔树特性。
+trie.go：实现了Trie对象的主要逻辑功能。
+secure_trie.go：实现了SecureTrie对象。
+sync.go：实现了SyncTrie对象的定义和所有方法。
+iterator.go：定义了所有枚举相关接口和实现。
+database.go：实现了Database对象的主要逻辑功能。
+commiter.go：实现了向内存数据库提交修改后的树节点的方法。
+errors.go：只定义了一个结构体：MissingNodeError。当找不到相应的结点时，就会返回这个错误。
+proof.go：只包含了Prove和VerifyProof两个函数，它们只在轻量级以太坊子协议（LES）中被使用。这两个函数被用来提供自己拥有某一对(Key, Value)的证明数据，以及对数据进行验证。
+一．节点分类
+前面已经介绍过，以太坊的MPT树中，树节点可以分为四类，分别为空节点，分支节点，叶子节点以及扩展节点。其中空节点为nil，分支节点被定义为数据结构fullNode，叶子节点和扩展节点都被定义为shortNode，但是根据其中的Val字段的不同，当Val字段为hashNode时，这个节点为扩展节点，当Val字段为valueNode时，这个节点为叶子节点。它们各自在源码中的定义已经在前面给出，这里就不再过多说明。
+它们的定义位于encoding.go文件中，这个文件除了对节点的类型进行定义之外，还给出这些类型拥有的方法，我们对其中的主要方法进行列举，并在代码注释中给出这些方法的用途。
+// EncodeRLP encodes a full node into the consensus RLP format.
+// 它将一个fullNode编码成RLP形式，需要注意的是这个编码过程是不会递归进行的，它只对当前节点进行编码。
+func (n *fullNode) EncodeRLP(w io.Writer) error
+
+// decodeNode parses the RLP encoding of a trie node.
+// 它将一个RLP编码的字节串解析为一个MPT节点
+func decodeNode(hash, buf []byte) (node, error) {
+	if len(buf) == 0 {
+		return nil, io.ErrUnexpectedEOF
+	}
+	elems, _, err := rlp.SplitList(buf)
+	if err != nil {
+		return nil, fmt.Errorf("decode error: %v", err)
+	}
+	switch c, _ := rlp.CountValues(elems); c {
+	case 2:
+		n, err := decodeShort(hash, elems)
+		return n, wrapError(err, "short")
+	case 17:
+		n, err := decodeFull(hash, elems)
+		return n, wrapError(err, "full")
+	default:
+		return nil, fmt.Errorf("invalid number of list elements: %v", c)
+	}
+}
+
+//解析一个RLP编码的shortNode
+func decodeShort(hash, elems []byte) (node, error) {
+	...
+	r, _, err := decodeRef(rest)
+	...
+}
+
+//解析一个RLP编码的fullNode
+func decodeFull(hash, elems []byte) (*fullNode, error) {
+	...
+	cld, rest, err := decodeRef(elems)
+	...
+}
+
+func decodeRef(buf []byte) (node, []byte, error)
+其中，对RLP编码进行解码过程中用到的主要函数是decodeNode()，它会根据解析节点的类型，来分别调用decodeShort()或者decodeFull()。
+二．Trie对象的实现
+关于Trie对象的操作主要可以分为两类，一类是对内存中已经加载的Trie对象进行增删查改，另一类是计算内存中Trie对象的哈希值，以及将整个树写入数据库中。
+可以使用trie.New来创建或打开一个Trie对象。
+其中对于Trie对象进行增删查改的操作如下：
+// Get returns the value for key stored in the trie.
+// The value bytes must not be modified by the caller.
+func (t *Trie) Get(key []byte) []byte
+
+// Update associates key with value in the trie. Subsequent calls to
+// Get will return value. If value has length zero, any existing value
+// is deleted from the trie and calls to Get will return nil.
+//
+// The value bytes must not be modified by the caller while they are
+// stored in the trie.
+func (t *Trie) Update(key, value []byte)
+
+// Delete removes any existing value for key from the trie.
+func (t *Trie) Delete(key []byte)
+除此之外，还包含TryXXX等几个类似的方法。注意到，Update方法中就已经包含了插入节点以及删除节点的操作。
+对于Trie对象哈希值计算以及数据库写入的操作如下：
+// Hash returns the root hash of the trie. It does not write to the
+// database and can be used even if the trie doesn't have one.
+func (t *Trie) Hash() common.Hash
+
+// Commit writes all nodes to the trie's memory database, tracking the internal
+// and external (for account tries) references.
+func (t *Trie) Commit(onleaf LeafCallback) (root common.Hash, err error)
+1.增删查改
+对于Trie对象的增删查改，其主要是对树的某一条路径上所有节点的访问。因此，我们对这一访问过程进行总结如下图所示：
+
+ 
+这里给出TryGet()函数的相关源码，主要为了解释对树上节点的访问过程，其他操作在访问时会涉及对树结构的修改等（如果修改发生，需要标记路径上的节点的dirty字段，这个在后面提交整颗树时会用到，它只会提交发生修改过的节点），相对复杂一点，但总体过程相似。
+// TryGet returns the value for key stored in the trie.
+// The value bytes must not be modified by the caller.
+// If a node was not found in the database, a MissingNodeError is returned.
+func (t *Trie) TryGet(key []byte) ([]byte, error) {
+	value, newroot, didResolve, err := t.tryGet(t.root, keybytesToHex(key), 0)
+	if err == nil && didResolve {
+		t.root = newroot
+	}
+	return value, err
+}
+
+func (t *Trie) tryGet(origNode node, key []byte, pos int) (value []byte, newnode node, didResolve bool, err error) {
+	switch n := (origNode).(type) {
+	case nil:
+		return nil, nil, false, nil
+	case valueNode:
+		return n, n, false, nil
+	case *shortNode:
+		if len(key)-pos < len(n.Key) || !bytes.Equal(n.Key, key[pos:pos+len(n.Key)]) {
+			// key not found in trie
+			return nil, n, false, nil
+		}
+		value, newnode, didResolve, err = t.tryGet(n.Val, key, pos+len(n.Key))
+		if err == nil && didResolve {
+			n = n.copy()
+			n.Val = newnode
+		}
+		return value, n, didResolve, err
+	case *fullNode:
+		value, newnode, didResolve, err = t.tryGet(n.Children[key[pos]], key, pos+1)
+		if err == nil && didResolve {
+			n = n.copy()
+			n.Children[key[pos]] = newnode
+		}
+		return value, n, didResolve, err
+	case hashNode:
+		child, err := t.resolveHash(n, key[:pos])
+		if err != nil {
+			return nil, n, true, err
+		}
+		value, newnode, _, err := t.tryGet(child, key, pos)
+		return value, newnode, true, err
+	default:
+		panic(fmt.Sprintf("%T: invalid node: %v", origNode, origNode))
+	}
+}
+其中tryGet()方法的返回参数value表示相应Key所对应的Value值，didResolve表示当遇到hashNode时需要从数据库中加载相应的shortNode节点或者fullNode节点，如果加载成功，则该字段为true。在这之后，则要修改所有这个hashNode之前节点的指针，即Val字段，因为在没有加载之前hashNode的父节点的Val字段是指向一个hashNode节点的，而在加载之后它会被更新为其他节点，因此需要依次地修改这条路上所有节点的指针，其中newnode就是为这个步骤准备的。
+tryGet()方法是递归调用的，如果该方法执行成功，则会返回查询结果value。如果在该方法的调用过程中，需要从数据库中加载新的节点，那么从根节点到这条节点路径上的所有节点都会被修改，最终Trie对象的root也会被修。
+2.哈希计算及提交
+Trie对象中计算哈希的方法如下所示，它会对那些树上修改过的节点（dirty字段为true）重新计算哈希值：
+// Hash returns the root hash of the trie. It does not write to the
+// database and can be used even if the trie doesn't have one.
+func (t *Trie) Hash() common.Hash {
+	hash, cached, _ := t.hashRoot(nil)
+	t.root = cached
+	return common.BytesToHash(hash.(hashNode))
+}
+
+// hashRoot calculates the root hash of the given trie
+func (t *Trie) hashRoot(db *Database) (node, node, error) {
+	...
+	h := newHasher(t.unhashed >= 100)
+	defer returnHasherToPool(h)
+	hashed, cached := h.hash(t.root, true)
+	...
+}
+其中完成主要功能的函数为hash()，这个函数的定义位于hasher.go文件中，我们会在后续进行介绍。
+Trie对象中将MPT树提交到数据库的方法如下所示：
+// Commit writes all nodes to the trie's memory database, tracking the internal
+// and external (for account tries) references.
+func (t *Trie) Commit(onleaf LeafCallback) (root common.Hash, err error) {
+	...
+	rootHash := t.Hash()
+	h := newCommitter()
+	defer returnCommitterToPool(h)
+
+	// Do a quick check if we really need to commit, before we spin
+	// up goroutines. This can happen e.g. if we load a trie for reading storage
+	// values, but don't write to it.
+	if _, dirty := t.root.cache(); !dirty {
+		return rootHash, nil
+	}
+	...
+	var newRoot hashNode
+	newRoot, err = h.Commit(t.root, t.db)
+	...
+	t.root = newRoot
+	return rootHash, nil
+}
+其中完成主要功能的函数为Commit()，这个函数的定义位于commiter.go文件中，我们会在后续进行介绍。
+三．hasher.go
+该文件提供了计算一个节点及其所有子孙节点哈希值的方法，最终计算的哈希值存放在节点的nodeflag字段中，它的主要函数内容如下：
+// hash collapses a node down into a hash node, also returning a copy of the
+// original node initialized with the computed hash to replace the original one.
+func (h *hasher) hash(n node, force bool) (hashed node, cached node) {
+	// Return the cached hash if it's available
+	if hash, _ := n.cache(); hash != nil {
+		return hash, n
+	}
+	// Trie not processed yet, walk the children
+	switch n := n.(type) {
+	case *shortNode:
+		collapsed, cached := h.hashShortNodeChildren(n)
+		hashed := h.shortnodeToHash(collapsed, force)
+		// We need to retain the possibly _not_ hashed node, in case it was too
+		// small to be hashed
+		if hn, ok := hashed.(hashNode); ok {
+			cached.flags.hash = hn
+		} else {
+			cached.flags.hash = nil
+		}
+		return hashed, cached
+	case *fullNode:
+		collapsed, cached := h.hashFullNodeChildren(n)
+		hashed = h.fullnodeToHash(collapsed, force)
+		if hn, ok := hashed.(hashNode); ok {
+			cached.flags.hash = hn
+		} else {
+			cached.flags.hash = nil
+		}
+		return hashed, cached
+	default:
+		// Value and hash nodes don't have children so they're left as were
+		return n, n
+	}
+}
+
+// hashShortNodeChildren collapses the short node. The returned collapsed node
+// holds a live reference to the Key, and must not be modified.
+// The cached
+func (h *hasher) hashShortNodeChildren(n *shortNode) (collapsed, cached *shortNode) {
+	// Hash the short node's child, caching the newly hashed subtree
+	collapsed, cached = n.copy(), n.copy()
+	// Previously, we did copy this one. We don't seem to need to actually
+	// do that, since we don't overwrite/reuse keys
+	//cached.Key = common.CopyBytes(n.Key)
+	collapsed.Key = hexToCompact(n.Key)
+	// Unless the child is a valuenode or hashnode, hash it
+	switch n.Val.(type) {
+	case *fullNode, *shortNode:
+		collapsed.Val, cached.Val = h.hash(n.Val, false)
+	}
+	return collapsed, cached
+}
+
+func (h *hasher) hashFullNodeChildren(n *fullNode) (collapsed *fullNode, cached *fullNode) {
+	// Hash the full node's children, caching the newly hashed subtrees
+	cached = n.copy()
+	collapsed = n.copy()
+	if h.parallel {
+		...
+	} else {
+		for i := 0; i < 16; i++ {
+			if child := n.Children[i]; child != nil {
+				collapsed.Children[i], cached.Children[i] = h.hash(child, false)
+			} else {
+				collapsed.Children[i] = nilValueNode
+			}
+		}
+	}
+	return collapsed, cached
+}
+hash()函数会首先检查当前节点是否已经缓存了相应的哈希值，如果已经缓存则直接返回。如果没有，则根据该节点的类型：如果该节点为shortNode，则调用hashShortNodeChildren()函数；如果该节点为fullNode，则调用hashFullNodeChildren()函数。这两个函数的作用是计算当前节点孩子节点的哈希值，并写入它们对应的Val字段。注意到，在调用这两个函数的过程中会调用hash()函数，因此对hash()函数的调用是一个递归的过程。同时，在这两个函数调用过程中创建了两个变量分别为cached以及collapsed，其中cached变量的作用是维持原本树的结构关系（它在整个过程中都是不变的，只是对nodeflag字段的哈希值进行了设置），而collapsed是为了计算节点的哈希值而存在的（它会把shortNode的Key编码由Hex编码转换为HP编码，同时所有这类节点的Val字段都是指向一个hashNode而不是其他的节点类型）。
+最后，当递归返回时，hash()函数会调用shortnodeToHash()或者fullnodeToHash()计算该节点的哈希值并存入nodeflag字段。
+
+参考文献：https://blog.csdn.net/qq_55179414/article/details/118935827
