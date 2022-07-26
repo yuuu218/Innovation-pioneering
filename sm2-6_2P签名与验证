@@ -1,0 +1,52 @@
+/*implement sm2 2P sign with real network communication
+门限密码算法通常用 (n， k）形式表示，n 表示参与者的个数， k 表示门限值（也被称为阈值），表示要完成秘密运算时最少需要的参与者个数。在攻击者能够攻破或完全控制的参与者个数少于 k 个的
+前提下，门限密码算法依然能够保持其安全性。
+接下来介绍一下这种 SM2 门限密码方案的原理：它是一种（2，2）门限密码方案，即需要两个参与方，才能完成用到私钥的密码运算（如签名、解密）。
+公钥及私钥份额生成算法：当需要生成 SM2 非对称密钥时，由两个参与方各自独立生成一个私钥份额（或称为私钥片段、私钥分量），双方通过交互通信、传输一些辅助计算数据，由其中一方合并辅助数据
+生成 SM2 公钥。只要这两个参与方不串通，就没有办法恢复出完整的 SM2 私钥。在攻击者至多只能攻破其中一个参与方的情况下，攻击者也没有办法恢复出完整的 SM2 私钥。
+门限签名算法：当需要对消息进行 SM2 签名时，两个参与方分别使用各自持有的签名私钥片段，计算生成签名片段，然后双方交互传输签名片段等辅助计算数据，由其中一方对收到的数据进行合并计算，
+生成 SM2 签名。
+门限解密算法：当需要对 SM2 密文进行解密时，两个参与方分别使用各自持有的解密私钥片段，计算生成明文片段，然后双方交互传输明文片段等辅助计算数据，由其中一方对收到的数据进行合并计算，
+生成解密后的明文。*/
+
+def twoP_sign():
+    IDA = 'ALICE123@YAHOO.COM'
+    IDB = 'BOB123@YAHOO.COM'
+    M = 'message digest'
+    n = 0x8542D69E4C044F18E8B92435BF6FF7DD297720630485628D5AE74EE7C32E79B7
+    xG = 0x421DEBD61B62EAB6746434EBC3CC315E32220B3BADD50BDC4C4E6C147FEDD43D
+    yG = 0x0680512BCBB42C07D47349D2153B70C4E5D7FDFCBFA36EA1A85841B9E46E09A2
+    G=(xG,yG)
+    d1= random.randint(1, n - 1)
+    sm2_A = SM2(*demo_para(),);sm2_B = SM2(*demo_para(),)
+    p1=(0,0)
+    p=(0,0)
+    p1=sm2_A.Jacb_multiply(get_inverse(d1, n),G)
+    d2 = random.randint(1, n - 1)
+    d=get_inverse(d1*d2,n)-1
+    fan = sm2_B.minus(G)
+    p2=sm2_B.Jacb_multiply(get_inverse(d2, n),G)
+    p = sm2_B.add(sm2_B.Jacb_multiply(get_inverse(d2, n), p1),fan)  #公钥
+    sm2_A =SM2(*demo_para(),IDA,d,p )
+    sm2_B= SM2(*demo_para(), IDB, d, p)
+    k1 = random.randint(1, n - 1)
+    q1=(0,0)
+    q1=sm2_A.Jacb_multiply(k1,G)
+    M_ = join_bytes([sm2_A.get_Z(), M])
+    e = to_int(sm3(M_))
+
+    k2 = random.randint(1, n - 1)
+    k3 = random.randint(1, n - 1)
+    q2 = (0, 0);x1=0;y1=0;
+    q2 = sm2_B.Jacb_multiply(k2, G)
+    x1,y1=sm2_B.add(sm2_B.Jacb_multiply(k3, q1),q2)
+    q3 = (x1, y1)
+    r=(x1+e)%n
+    s2=(d2*k3)%n
+    s3=(d2*(r+k2))%n
+    s=((d1*k1)*s2+d1*s3-r)%n
+    print("签名为：",hex(r),hex(s))
+    keysize = len(to_byte(n))
+    sig = to_byte((r, s), keysize)
+    res = sm2_A.verify(M, sig, IDA, p)
+    print("验证签名为：",res)
