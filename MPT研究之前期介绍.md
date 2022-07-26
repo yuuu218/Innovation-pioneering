@@ -16,13 +16,13 @@ Trie树，又称前缀树或字典树，是一种有序树，用于保存关联�
 
 常见的用来存英文单词的trie每个节点是一个长度为27的指针数组，index0-25代表a-z字符，26为标志域。如图：
 
-![](C:\Users\74463\Desktop\图片2.png) 
+![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/jpg2.png?raw=true)
 
 ## 二．Patricia树
 
 Patricia树，或称Patricia trie，或crit bit tree，压缩前缀树，是一种更节省空间的Trie。对于基数树的每个节点，如果该节点是唯一的儿子的话，就和父节点合并。
 
-![](C:\Users\74463\Desktop\图片3.png) 
+![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/jpg3.png?raw=true)
 
 ## 三．Merkle树
 
@@ -34,13 +34,13 @@ Merkle Tree，通常也被称作Hash Tree，顾名思义，就是存储hash值�
 
 怎么确定小的数据块没有损坏哪？只需要为每个数据块做Hash。BT下载的时候，在下载到真正数据之前，我们会先下载一个Hash列表。那么问题又来了，怎么确定这个Hash列表是正确的？答案是把每个小块数据的Hash值拼到一起，然后对这个长字符串在作一次Hash运算，这样就得到Hash列表的根Hash(Top Hash or Root Hash)。下载数据的时候，首先从可信的数据源得到正确的根Hash，就可以用它来校验Hash列表了，然后通过校验后的Hash列表校验数据块。
 
-![](C:\Users\74463\Desktop\图片4.png) 
+![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/jpg4.png?raw=true)
 
 Merkle Tree可以看做Hash List的泛化（Hash List可以看作一种特殊的Merkle Tree，即树高为2的多叉Merkle Tree。
 
 在最底层，和哈希列表一样，我们把数据分成小的数据块，有相应地哈希和它对应。但是往上走，并不是直接去运算根哈希，而是把相邻的两个哈希合并成一个字符串，然后运算这个字符串的哈希，这样每两个哈希就结婚生子，得到了一个”子哈希“。如果最底层的哈希总数是单数，那到最后必然出现一个单身哈希，这种情况就直接对它进行哈希运算，所以也能得到它的子哈希。于是往上推，依然是一样的方式，可以得到数目更少的新一级哈希，最终必然形成一棵倒挂的树，到了树根的这个位置，这一代就剩下一个根哈希了，我们把它叫做 Merkle Root。
 
-![](C:\Users\74463\Desktop\图片5.png) 
+![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/jpg5.png?raw=true)
 
 在p2p网络下载网络之前，先从可信的源获得文件的Merkle Tree树根。一旦获得了树根，就可以从其他从不可信的源获取Merkle tree。通过可信的树根来检查接受到的Merkle Tree。如果Merkle Tree是损坏的或者虚假的，就从其他源获得另一个Merkle Tree,直到获得一个与可信树根匹配的MerkleTree。
 
@@ -56,7 +56,7 @@ Merkle Tree和Hash List的主要区别是，可以直接下载并立即验证Mer
 
 对于如下图所示的默克尔树：
 
-![](C:\Users\74463\Desktop\图片6.png)
+![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/jpg6.png?raw=true)
 
 它的典型应用包括如下几个场景：
 
@@ -101,7 +101,7 @@ Merkle Tree和Hash List的主要区别是，可以直接下载并立即验证Mer
 
 我们可以用一张图来概括上面的四种MPT：
 
-![](C:\Users\74463\Desktop\图片7.png) 
+![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/jpg7.png?raw=true)
 
 ### 3.重要概念
 
@@ -125,17 +125,17 @@ MPT树中另外一个重要的概念是一个特殊的十六进制前缀(hex-pre
 
 HP编码很简单。一个nibble被加到key前（下图中的prefix），对终止符的状态和奇偶性进行编码。最低位表示奇偶性，第二低位编码终止符状态。如果key是偶数长度，那么加上另外一个nibble，值为0来保持整体的偶特性。
 
-![](C:\Users\74463\Desktop\图片8.png) 
+![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/jpg8.png?raw=true)
 
 如图所示，总共有2个扩展节点，2个分支节点，4个叶子节点。
 
 其中叶子结点的键值情况为：
 
-![](C:\Users\74463\Desktop\图片9.png) 
+![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/jpg9.png?raw=true)
 
 节点的前缀：
 
-![](C:\Users\74463\Desktop\图片10.png) 
+![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/jpg10.png?raw=true)
 
  
 
