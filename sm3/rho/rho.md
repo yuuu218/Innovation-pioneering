@@ -8,27 +8,27 @@ f=2x+1
 
 8bit:
 
-![](C:\Users\74463\Desktop\8.png)
+![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/8.png?raw=true)
 
 12bit:
 
-![](C:\Users\74463\Desktop\12.png)
+![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/12.png?raw=true)
 
 16bit:
 
-![](C:\Users\74463\Desktop\16.png)
+![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/16.png?raw=true)
 
 20bit:
 
-![](C:\Users\74463\Desktop\20.png)
+![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/20.png?raw=true)
 
 24bit：
 
-![](C:\Users\74463\Desktop\24.png)
+![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/24.png?raw=true)
 
 28bit:
 
-![](C:\Users\74463\Desktop\28.png)
+![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/28.png?raw=true)
 
 # 方法二
 
@@ -58,20 +58,20 @@ f=2x+1
 
 8bit:
 
-![](C:\Users\74463\Desktop\cpp8.png)
+![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/cpp8.png?raw=true)
 
 12bit:
 
-![](C:\Users\74463\Desktop\cpp12.png)
+![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/cpp12.png?raw=true)
 
 16bit:
 
-![](C:\Users\74463\Desktop\cpp16.png)
+![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/cpp16.png?raw=true)
 
 20bit:
 
-![](C:\Users\74463\Desktop\cpp20.png)
+![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/cpp20.png?raw=true)
 
 24bit:
 
-![](C:\Users\74463\Desktop\cpp24.png)
+![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/cpp24.png?raw=true)
