@@ -6,7 +6,7 @@
 
 2. 按照该固定长度，将明文分块加密，并用前一个块的加密结果，作为下一块加密的初始向量（Initial Vector）。满足上述要求的散列函数称为Merkle–Damgård散列函数（Merkle–Damgård hash function），
 
-   ![](C:\Users\74463\Desktop\tu2.png)
+   ![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/tu2.png?raw=true)
 
    
 
@@ -22,11 +22,11 @@
 
 ## C++运行结果
 
-![](C:\Users\74463\Desktop\tu1.png)
+   ![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/tu1.png?raw=true)
 
 ## python运行结果
 
-![](C:\Users\74463\Desktop\tu3.png)
+   ![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/tu3.png?raw=true)
 
 ## 参考文献
 
