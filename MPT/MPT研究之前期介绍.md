@@ -137,12 +137,8 @@ HP编码很简单。一个nibble被加到key前（下图中的prefix），对终
 
 ![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/jpg10.png?raw=true)
 
- 
+## 参考文献
+[以太坊Geth Trie源码解析](https://blog.csdn.net/qq_55179414/article/details/118935827)
 
- 
 
- 
-
-参考文献：https://blog.csdn.net/qq_55179414/article/details/118935827
-
-参考文献：https://blog.csdn.net/qq_33935254/article/details/55505472
+[深入浅出以太坊MPT（Merkle Patricia Tree）](https://blog.csdn.net/qq_33935254/article/details/55505472)
