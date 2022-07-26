@@ -58,9 +58,21 @@ d=(k-s)(s+r)^(-1)
 r=(e+x)
 kG=(x,y)
 /
-k*G[0]=x;
-r=(e+x)%n;
-d=((k-s)*getInverse(s+r))%n;
+def leaking_k():
+    IDA = 'ALICE123@YAHOO.COM'
+    M = 'message digest'
+    dA = 0x128B2FA8BD433C6C068C8D803DFF79792A519A55171B1B650C23661D15897263
+    xA = 0x0AE4C7798AA0F119471BEE11825BE46202BB79E2A5844495E97C04FF4DF2548A
+    yA = 0x7C0240F88F1CD4E16352A73C17B7F16F07353E53A176D684A9FE0C6BB798E857
+    n = 0x8542D69E4C044F18E8B92435BF6FF7DD297720630485628D5AE74EE7C32E79B7
+    PA = (xA, yA)
+    k = 0x6CB28D99385C175C94F94E934817663FC176D925DD72B727260DBAAE1FB2F96F
+    # A、B双方初始化
+    sm2_A = SM2(*demo_para(), IDA, dA, PA)
+    sm2_B = SM2(*demo_para())
+    r, s,e= sm2_A.sign(M, k, 0, )
+    d=get_inverse(r + s, n)*(k-s)%n;
+    print("d为：",hex(d))
 
 
 /*k的重用导致d的泄露*/
@@ -83,4 +95,23 @@ s1(1+d)=k-r1*d
 s2(1+d)=k-r2*d
 =>d=(s2-s1)/(s1-s2+r1-r2)
 */
-d=((s2-s1)*getInverse(s1-s2+r1-r2,n))%n;
+def reusing_k():
+    IDA1 = 'ALICE123@YAHOO.COM'
+    M1 = 'message digest'
+    IDA2 = 'BOB123@YAHOO.COM'
+    M2 = 'practice'
+    dA = 0x128B2FA8BD433C6C068C8D803DFF79792A519A55171B1B650C23661D15897263
+    xA = 0x0AE4C7798AA0F119471BEE11825BE46202BB79E2A5844495E97C04FF4DF2548A
+    yA = 0x7C0240F88F1CD4E16352A73C17B7F16F07353E53A176D684A9FE0C6BB798E857
+    n = 0x8542D69E4C044F18E8B92435BF6FF7DD297720630485628D5AE74EE7C32E79B7
+    PA = (xA, yA)
+    k = 0x6CB28D99385C175C94F94E934817663FC176D925DD72B727260DBAAE1FB2F96F
+    # A、B双方初始化
+    sm2_A1 = SM2(*demo_para(), IDA1, dA, PA)
+    sm2_B1 = SM2(*demo_para())
+    r1, s1, e1 = sm2_A1.sign(M1, k, 0, )
+    sm2_A2 = SM2(*demo_para(), IDA2, dA, PA)
+    sm2_B2 = SM2(*demo_para())
+    r2, s2, e2 = sm2_A1.sign(M2, k, 0, )
+    d = ((s2 - s1) * get_inverse(s1 - s2 + r1 - r2, n)) % n;
+    print("d为：", hex(d))
