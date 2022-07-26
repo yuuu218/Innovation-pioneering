@@ -1,0 +1,161 @@
+以下为SM2签名所需的基础函数。
+small_primes = np.array([2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41,
+                         43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109,
+                         113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191,
+                         193, 197, 199, 211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269,
+                         271, 277, 281, 283, 293, 307, 311, 313, 317, 331, 337, 347, 349, 353,
+                         359, 367, 373, 379, 383, 389, 397, 401, 409, 419, 421, 431, 433, 439,
+                         443, 449, 457, 461, 463, 467, 479, 487, 491, 499, 503, 509, 521, 523,
+                         541, 547, 557, 563, 569, 571, 577, 587, 593, 599, 601, 607, 613, 617,
+                         619, 631, 641, 643, 647, 653, 659, 661, 673, 677, 683, 691, 701, 709,
+                         719, 727, 733, 739, 743, 751, 757, 761, 769, 773, 787, 797, 809, 811,
+                         821, 823, 827, 829, 839, 853, 857, 859, 863, 877, 881, 883, 887, 907,
+                         911, 919, 929, 937, 941, 947, 953, 967, 971, 977, 983, 991, 997])
+
+
+def is_prime(num):
+    # 排除0,1和负数
+    if num < 2:
+        return False
+    # 排除小素数的倍数
+    for prime in small_primes:
+        if num % prime == 0:
+            return False
+    # 未分辨出来的大整数用rabin算法判断
+    return rabin_miller(num)
+
+
+def rabin_miller(num):
+    s = num - 1
+    t = 0
+    while s & 1 == 0:
+        s >>= 1
+        t += 1
+    for trials in range(5):
+        a = random.randrange(2, num - 1)
+        v = pow(a, s, num)
+        if v != 1:
+            i = 0
+            while v != (num - 1):
+                if i == t - 1:
+                    return False
+                else:
+                    i = i + 1
+                    v = v * v % num
+    return True
+
+
+# 将字节转换为int
+def to_int(byte):
+    return int.from_bytes(byte, byteorder='big')
+
+
+# 转换为bytes，第二参数为字节数（可不填）
+def to_byte(x, size=None):
+    if isinstance(x, int):
+        if size is None:  # 计算合适的字节数
+            size = 0
+            tmp = x >> 64
+            while tmp:
+                size += 8
+                tmp >>= 64
+            tmp = x >> (size << 3)
+            while tmp:
+                size += 1
+                tmp >>= 8
+        elif x >> (size << 3):  # 指定的字节数不够则截取低位
+            x &= (1 << (size << 3)) - 1
+        return x.to_bytes(size, byteorder='big')
+    elif isinstance(x, str):
+        x = x.encode()
+        if size != None and len(x) > size:  # 超过指定长度
+            x = x[:size]  # 截取左侧字符
+        return x
+    elif isinstance(x, bytes):
+        if size != None and len(x) > size:  # 超过指定长度
+            x = x[:size]  # 截取左侧字节
+        return x
+    elif isinstance(x, tuple) and len(x) == 2 and type(x[0]) == type(x[1]) == int:
+        # 针对坐标形式(x, y)
+        return to_byte(x[0], size) + to_byte(x[1], size)
+    return bytes(x)
+
+
+# 将列表元素转换为bytes并连接
+def join_bytes(data_list):
+    return b''.join([to_byte(i) for i in data_list])
+
+
+# 求最大公约数
+def gcd(a, b):
+    return a if b == 0 else gcd(b, a % b)
+
+
+# 求乘法逆元过程中的辅助递归函数
+def get_(a, b):
+    if b == 0:
+        return 1, 0
+    x1, y1 = get_(b, a % b)
+    x, y = y1, x1 - a // b * y1
+    return x, y
+
+
+# 求乘法逆元
+def get_inverse(a, p):
+    # return pow(a, p-2, p) # 效率较低、n倍点的时候两种计算方法结果会有不同
+    if gcd(a, p) == 1:
+        x, y = get_(a, p)
+        return x % p
+    return 1
+
+
+def get_cpu_time():
+    return time.perf_counter()
+
+
+# 密钥派生函数（从一个共享的秘密比特串中派生出密钥数据）
+# SM2第3部分 5.4.3
+# Z为bytes类型
+# klen表示要获得的密钥数据的比特长度（8的倍数），int类型
+# 输出为bytes类型
+def KDF(Z, klen):
+    ksize = klen >> 3
+    K = bytearray()
+    for ct in range(1, math.ceil(ksize / HASH_SIZE) + 1):
+        K.extend(sm3(Z + to_byte(ct, 4)))
+    return K[:ksize]
+
+# 计算比特位数
+def get_bit_num(x):
+    if isinstance(x, int):
+        num = 0
+        tmp = x >> 64
+        while tmp:
+            num += 64
+            tmp >>= 64
+        tmp = x >> num >> 8
+        while tmp:
+            num += 8
+            tmp >>= 8
+        x >>= num
+        while x:
+            num += 1
+            x >>= 1
+        return num
+    elif isinstance(x, str):
+        return len(x.encode()) << 3
+    elif isinstance(x, bytes):
+        return len(x) << 3
+return 0
+
+椭圆曲线系统参数设置：
+def demo_para():
+    p = 0x8542D69E4C044F18E8B92435BF6FF7DE457283915C45517D722EDB8B08F1DFC3
+    a = 0x787968B4FA32C3FD2417842E73BBFEFF2F3C848B6831D7E0EC65228B3937E498
+    b = 0x63E4C6D3B23B0C849CF84241484BFE48F61D59A5B16BA06E6E12D1DA27C5249A
+    xG = 0x421DEBD61B62EAB6746434EBC3CC315E32220B3BADD50BDC4C4E6C147FEDD43D
+    yG = 0x0680512BCBB42C07D47349D2153B70C4E5D7FDFCBFA36EA1A85841B9E46E09A2
+    n = 0x8542D69E4C044F18E8B92435BF6FF7DD297720630485628D5AE74EE7C32E79B7
+    G = (xG, yG)
+    h = 1
+    return p, a, b, n, G, h
