@@ -1,0 +1,23 @@
+def test_signature():
+    IDA = 'ALICE123@YAHOO.COM'
+    M = 'message digest'
+    dA = 0x128B2FA8BD433C6C068C8D803DFF79792A519A55171B1B650C23661D15897263
+    xA = 0x0AE4C7798AA0F119471BEE11825BE46202BB79E2A5844495E97C04FF4DF2548A
+    yA = 0x7C0240F88F1CD4E16352A73C17B7F16F07353E53A176D684A9FE0C6BB798E857
+    PA = (xA, yA)
+    k = 0x6CB28D99385C175C94F94E934817663FC176D925DD72B727260DBAAE1FB2F96F
+    # A、B双方初始化
+    sm2_A = SM2(*demo_para(), IDA, dA, PA)
+    sm2_B = SM2(*demo_para())
+    M_ = join_bytes([sm2_A.get_Z(), M])
+    k1 = deterministic_generate_k(M_, dA)
+    #print("新生成的k为：",k1)
+    time_1 = get_cpu_time()
+    sig = sm2_A.sign(M, k)
+    # B对消息M签名进行验证
+    res = sm2_B.verify(M, sig, IDA, PA)
+    time_2 = get_cpu_time()
+    print('SM2签名、验证完毕，耗时%.2f ms' % ((time_2 - time_1) * 1000))
+    print('结果：%s，r值：%s' % (res, sig[:sm2_A.keysize].hex()))
+    print('结果：%s，s值：%s' % (res, sig[sm2_A.keysize:2*sm2_A.keysize].hex()))
+
