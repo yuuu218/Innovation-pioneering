@@ -2,7 +2,7 @@
 
 一、比特币中的数字签名过程
 
-![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/R1.png?raw=true)
+<img src="https://github.com/yuuu218/Innovation-pioneering/blob/main/image/R1.png?raw=true"  height="330" width="495">
 
 首先获得一个公钥P，P的生成采用的是椭圆曲线签名算法，d对应的是私钥，G为椭圆曲线的基点，采用的乘法运算也是椭圆曲线的点乘法。
 
