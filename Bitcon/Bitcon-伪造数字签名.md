@@ -16,7 +16,7 @@
 
 在比特币系统中，其实是先有输出才有的输入。只有在新交易中合法引入UTXO，才可以构建成合法的交易。输入 = 之前的未被花费的输出（UTXO），所以我们通过查找txid找到区块链中之前的UTXO来验证输入合法。
 
-![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/R3.png?raw=true)
+<img src="https://github.com/yuuu218/Innovation-pioneering/blob/main/image/R3.png?raw=true"  height="200" width="600">
 
 在上面的示例中可以看出：引入的UTXO中包含0.1BTC以及一个“锁定脚本(scriptPubKey)”。普遍情况下锁定脚本包括其中的PubKHash 。
 
