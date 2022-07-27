@@ -52,23 +52,23 @@ def forge(c, a=-1): \#创造一个伪造的ECDSA签名
 
 \#将a设置为-1以外的值，使其不那么明显
 
-a = N(a)
+           a = N(a)
 
-R = c\*G + int(a)\*P
+           R = c\*G + int(a)\*P
 
-s = N(int(R.xy()[0]))/a
+           s = N(int(R.xy()[0]))/a
 
-m = N(c)\*N(int(R.xy()[0]))/a
+           m = N(c)\*N(int(R.xy()[0]))/a
 
-print('hash1 = %d'%m)
+           print('hash1 = %d'%m)
 
-print('r1 = %d'%(int(R.xy()[0])))
+           print('r1 = %d'%(int(R.xy()[0])))
 
-print('s1 = %d'%s)
+           print('s1 = %d'%s)
 
 for c in range(1,10):
 
-forge(c)
+           forge(c)
 
 ![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/R6.png?raw=true)
 
