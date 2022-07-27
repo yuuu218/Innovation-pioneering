@@ -73,6 +73,7 @@ $A\leftarrow TT1$
 $H\leftarrow G$
 
 $G\leftarrow F\lll19$
+
 $F\leftarrow E$
 
 $E\leftarrow P_{0}(TT2)$
