@@ -80,7 +80,7 @@ $E\leftarrow P_{0}(TT2)$
 
 ENDFOR
 
-$V^{(i+1)}&\leftarrow ABCDEFGH\oplus v^{(i)}$
+$V^{(i+1)}\leftarrow ABCDEFGH\oplus v^{(i)}$
 
 其中，字的存储为大端(big-endian)格式。
 
