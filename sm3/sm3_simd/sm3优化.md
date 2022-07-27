@@ -78,7 +78,7 @@ $F\leftarrow E$
 
 $E\leftarrow P_{0}(TT2)$
 
-$ENDFOR$
+ENDFOR
 
 $V^{(i+1)}&\leftarrow ABCDEFGH\oplus v^{(i)}$
 
