@@ -92,7 +92,7 @@ $V^{(i+1)}\leftarrow ABCDEFGH\oplus v^{(i)}$
 
 $ABCDEFGH\leftarrow v^{(n)}$
 
-输出256比特的杂凑值$ y = ABCDEFGH $。
+输出256比特的杂凑值$y = ABCDEFGH$。
 
 ### 数据统计
 
