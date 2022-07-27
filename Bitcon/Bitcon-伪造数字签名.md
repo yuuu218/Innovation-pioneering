@@ -2,7 +2,7 @@
 
 一、比特币中的数字签名过程
 
-<img src="https://github.com/yuuu218/Innovation-pioneering/blob/main/image/R1.png?raw=true"  height="330" width="495">
+<img src="https://github.com/yuuu218/Innovation-pioneering/blob/main/image/R1.png?raw=true"  height="330" width="400">
 
 首先获得一个公钥P，P的生成采用的是椭圆曲线签名算法，d对应的是私钥，G为椭圆曲线的基点，采用的乘法运算也是椭圆曲线的点乘法。
 
@@ -12,7 +12,7 @@
 
 二、交易举例
 
-![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/R2.png?raw=true)
+<img src="https://github.com/yuuu218/Innovation-pioneering/blob/main/image/R2.png?raw=true"  height="500" width="400">
 
 在比特币系统中，其实是先有输出才有的输入。只有在新交易中合法引入UTXO，才可以构建成合法的交易。输入 = 之前的未被花费的输出（UTXO），所以我们通过查找txid找到区块链中之前的UTXO来验证输入合法。
 
