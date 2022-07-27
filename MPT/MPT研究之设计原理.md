@@ -56,7 +56,7 @@ MPT 同样把 Key-Value 数据项的 Key 编码在树的路径中，但是如果
 
 下面给出了一个 MPT 的例子：
 
-!(https://github.com/yuuu218/Innovation-pioneering/blob/main/image/M1.png?raw=true)
+![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/M1.png?raw=true)
 
 **二．Key编码**
 
@@ -124,7 +124,7 @@ Hex编码向HP编码的转换规则如下：
 
 这几种编码的转换关系如下图所示：
 
-!(https://github.com/yuuu218/Innovation-pioneering/blob/main/image/M2.png?raw=true)
+![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/M2.png?raw=true)
 
 Raw编码：这是外界输入的编码方式，通常对于一个复杂类型的变量，经过RLP编码后的结果便可以作为Raw编码输入。当其要被存储在内存中的MPT树上的时候，它将会被转化为Hex编码形式。
 
@@ -172,7 +172,7 @@ Update：Insert和Delete操作的结合
 
 需要注意到的是，对一个节点进行提交是一个递归的操作，它会首先计算这个节点所有变脏的孩子节点的哈希，并将这些孩子节点进行提交，之后再修改该节点的 Value 字段指向新的孩子节点的哈希，最后计算当前节点的哈希值。同时，对孩子节点的哈希值计算过程中，可能需要计算孩子节点的孩子（如果存在且被修改的话）相应的哈希，因此这个过程是一个递归的过程。下图是一个例子：
 
-!(https://github.com/yuuu218/Innovation-pioneering/blob/main/image/M3.png?raw=true)
+![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/M3.png?raw=true)
 
 如果要将这棵树进行可持久化存储，需要首先计算得到左下角叶子节点的哈希 0xaa（这同样也是它存储在持久化数据库中的索引），再计算粉色节点的哈希 0xcc，然后由得到的这两个节点计算分支节点的哈希 0xdd，最后计算根节点的哈希 0xee。
 
@@ -194,7 +194,7 @@ Geth客户端会清除在内存中保留时间过长且未被使用到的的节�
 
 在公链的环境下，采用POW算法是可能会造成分叉而导致区块链状态进行回滚的。在以太坊中，由于出块时间短，这种分叉的几率很大，区块链状态回滚的现象很频繁。如下图所示：
 
-!(https://github.com/yuuu218/Innovation-pioneering/blob/main/image/M4.png?raw=true)
+![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/M4.png?raw=true)
 
 在上图中，一个节点的内容由27变为45，就需要新增4个节点而不会修改原来的节点（实际过程中可能不止4个），就对应成创建了一条由蓝线圈出的新路径。通过结合新增的节点以及橙色圈出的未被修改的节点，可以构造一棵新树，而旧路径依旧保留。因此，通过旧stateRoot，我们依旧能够查询到在过去区块上该节点的值为27。所以，在以太坊中，发生分叉而进行世界状态回滚时，仅需要用旧的MPT根节点作为入口，即可完成状态回滚。
 
@@ -224,9 +224,9 @@ MPT能够提供的一个重要功能 - 默克尔证明，使用默克尔证明�
 
 如有棵如下图所示的默克尔树，如果某个轻节点想要验证 9Dog:64 这个树节点是否存在与默克尔树中，只需要向全节点发送该请求，全节点会返回一个 1FXq:18, ec20, 8f74 的一个路径。得到路径之后，轻节点利用 9Dog:64 与 1FXq:18 求哈希，在与 ec20 求哈希，最后与 8f74 求哈希，得到的结果与本地维护的根哈希相比，是否相等。若相等，则证明该树节点存在于默克尔树中；否则，不存在。
 
-!(https://github.com/yuuu218/Innovation-pioneering/blob/main/image/M5.png?raw=true)
+![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/M5.png?raw=true)
 
-!(https://github.com/yuuu218/Innovation-pioneering/blob/main/image/M6.png?raw=true)
+![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/M6.png?raw=true)
 
 4.默克尔证明安全性
 
