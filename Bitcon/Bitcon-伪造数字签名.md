@@ -2,7 +2,7 @@
 
 一、比特币中的数字签名过程
 
-![](media/71a437709b07ce03a85ecde49b9ec3ec.png)
+![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/R1.png?raw=true)
 
 首先获得一个公钥P，P的生成采用的是椭圆曲线签名算法，d对应的是私钥，G为椭圆曲线的基点，采用的乘法运算也是椭圆曲线的点乘法。
 
@@ -12,19 +12,19 @@
 
 二、交易举例
 
-![](media/f0291c4e5c8a1b4d0dc2c2be2774656d.png)
+![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/R2.png?raw=true)
 
 在比特币系统中，其实是先有输出才有的输入。只有在新交易中合法引入UTXO，才可以构建成合法的交易。输入 = 之前的未被花费的输出（UTXO），所以我们通过查找txid找到区块链中之前的UTXO来验证输入合法。
 
-![](media/9961bad5c8350ff8f445c9f9773607b0.png)
+![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/R3.png?raw=true)
 
 在上面的示例中可以看出：引入的UTXO中包含0.1BTC以及一个“锁定脚本(scriptPubKey)”。普遍情况下锁定脚本包括其中的PubKHash 。
 
-![](media/f1032dc41288b75755de6e800cfbc9e2.png)
+![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/R4.png?raw=true)
 
 所以说，当新的交易使用正确的“解锁脚本”引入该UTXO时，才能算合法引入。如下红线中所示，即为引入该UTXO时提供的“解锁脚本”，也就对应于图中sig字段：
 
-![](media/c47a102f1435d21a7e0c232439a87e0b.png)
+![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/R5.png?raw=true)
 
 三、伪造数字签名
 
@@ -70,11 +70,11 @@ for c in range(1,10):
 
 forge(c)
 
-![](media/c62b19a1f74d2f09525f20d1e93fd642.png)
+![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/R6.png?raw=true)
 
 实现结果为：
 
-![](media/3cb0de7f0ce58f1c432836204f91abcd.png)
+![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/R7.png?raw=true)
 
 hash1 = 25292222169426362969760742810503101183086560848420849767135309758511048414376
 
