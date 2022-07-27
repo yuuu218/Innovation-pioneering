@@ -35,6 +35,7 @@
 所以说，如果验证者自己不执行哈希，但仅接受签名者给出的值，则给定公钥P，选择随机非零值a和b。计算R=aG+bP。现在， (R.x, R.x/b)是密钥P对“消息哈希” (R.x\*a/b)的有效签名。但是，这不会危及真实ECDSA的安全性，因为你无法找到哈希至所选（R.x \* a / b）值的消息。
 
 所以我们利用sage平台进行数字签名的伪造，关于为何使用sage平台主要是因为便于实现具体的有限域，具体代码实现如下：
+```c
 
 F = FiniteField (0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F)
 
@@ -69,6 +70,7 @@ def forge(c, a=-1): \#创造一个伪造的ECDSA签名
 for c in range(1,10):
 
            forge(c)
+```
 
 ![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/R6.png?raw=true)
 
