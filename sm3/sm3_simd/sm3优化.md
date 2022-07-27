@@ -49,26 +49,38 @@ c)FOR j=0 TO 63
 ### 压缩函数
 
 令A,B,C,D,E,F,G,H为字寄存器,$SS1,SS2,TT1,TT2$为中间变量,压缩函数$V^{i+l} = CF(V^{(i)},B^{(i)},0 \leq i\leq n-1$​。计算过程描述如下:
-$$\begin{equation}
-	\begin{aligned}
-	AB&CDEFGH\leftarrow v^{(i)}\\
-	FO&R\:j=0\:TO\:63\\
-&SS1\leftarrow((A\lll12)+E+(T_{j}\lll j))\lll7\\
-&SS2\leftarrow SS1\oplus (A \lll12)\\
-&TT1\leftarrow FF_{j}(A,B,C)+D+SS2+ W_{j}'\\
-&TT2\leftarrow GG_{j}(E,F,G)+H+SS1+W_{j}\\
-&D\leftarrow C\\
-&C\leftarrow B\lll 9\\
-&B\leftarrow A\\
-&A\leftarrow TT1\\
-&H\leftarrow G\\
-&G\leftarrow F\lll19\\
-&F\leftarrow E\\
-&E\leftarrow P_{0}(TT2)\\
-EN&DFOR\\
-V^{(i+1)}&\leftarrow ABCDEFGH\oplus v^{(i)}
-\end{aligned}
-\end{equation}$$
+
+$ABCDEFGH\leftarrow v^{(i)}$
+
+$FOR\:j=0\:TO\:63$
+
+$SS1\leftarrow((A\lll12)+E+(T_{j}\lll j))\lll7$
+
+$SS2\leftarrow SS1\oplus (A \lll12)$
+
+$TT1\leftarrow FF_{j}(A,B,C)+D+SS2+ W_{j}'$
+
+$TT2\leftarrow GG_{j}(E,F,G)+H+SS1+W_{j}$
+
+$D\leftarrow C$
+
+$C\leftarrow B\lll 9$
+
+$B\leftarrow A$
+
+$A\leftarrow TT1$
+
+$H\leftarrow G$
+
+$G\leftarrow F\lll19$
+$F\leftarrow E$
+
+$E\leftarrow P_{0}(TT2)$
+
+$ENDFOR$
+
+$V^{(i+1)}&\leftarrow ABCDEFGH\oplus v^{(i)}$
+
 其中，字的存储为大端(big-endian)格式。
 
 最后，再将计算完成的A、B、C、D、E、F、G、H和原来的A、B、C、D、E、F、G、H分别进行异或，就是压缩函数的输出。这个输出再作为下一次调用压缩函数时的初值。依次类推，直到用完最后一组132个消息字为止。
@@ -77,7 +89,7 @@ V^{(i+1)}&\leftarrow ABCDEFGH\oplus v^{(i)}
 
 将得到的A、B、C、D、E、F、G、H八个变量拼接输出，就是SM3算法的输出。
 
-$ ABCDEFGH\leftarrow v^{(n)} $
+$ABCDEFGH\leftarrow v^{(n)}$
 
 输出256比特的杂凑值$ y = ABCDEFGH $。
 
