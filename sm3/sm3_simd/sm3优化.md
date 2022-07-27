@@ -14,7 +14,7 @@ SM3的消息扩展步骤是以512位的数据分组作为输入的。因此，�
 2. 追加64位的数据长度
 
 例如:对消息01100001 01100010 01100011，其长度l=24，经填充得到比特串:
-![](C:\Users\74463\Desktop\simd2.png)
+![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/simd2.png?raw=true)
 
 ### 消息扩展
 
@@ -41,10 +41,10 @@ c)FOR j=0 TO 63
 ### 迭代压缩
 
 在上文已经提过，SM3的迭代过程和MD5类似，也是Merkle-Damgard结构。但和MD5不同的是，SM3使用消息扩展得到的消息字进行运算。这个迭代过程可以用这幅图表示：
-![](C:\Users\74463\Desktop\simd3.png)
+![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/simd3.png?raw=true)
 
 初值IV被放在A、B、C、D、E、F、G、H八个32位变量中。整个算法中最核心、也最复杂的地方就在于压缩函数。压缩函数将这八个变量进行64轮相同的计算，一轮的计算过程如下图所示：
-![](C:\Users\74463\Desktop\simd4.png)
+![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/simd4.png?raw=true)
 
 ### 压缩函数
 
@@ -103,7 +103,7 @@ abcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcd;
 
 将 SM3的消息扩展函数使用SIMD进行优化
 
-![](C:\Users\74463\Desktop\simd1.png)
+![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/simd1.png?raw=true)
 
 使用SIMD极大的提高了效率。
 
