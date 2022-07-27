@@ -20,11 +20,11 @@
 
 在上面的示例中可以看出：引入的UTXO中包含0.1BTC以及一个“锁定脚本(scriptPubKey)”。普遍情况下锁定脚本包括其中的PubKHash 。
 
-![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/R4.png?raw=true)
+<img src="https://github.com/yuuu218/Innovation-pioneering/blob/main/image/R4.png?raw=true"  height="200" width="600">
 
 所以说，当新的交易使用正确的“解锁脚本”引入该UTXO时，才能算合法引入。如下红线中所示，即为引入该UTXO时提供的“解锁脚本”，也就对应于图中sig字段：
 
-![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/R5.png?raw=true)
+<img src="https://github.com/yuuu218/Innovation-pioneering/blob/main/image/R5.png?raw=true"  height="300" width="600">
 
 三、伪造数字签名
 
