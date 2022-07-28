@@ -2,11 +2,11 @@
 
 1、首先在网站上生成一个随机测试币地址，要确保此时testnet=true。这样生成的Bitcoin Address 才会是m开头（测试网生成的），如果不设置，便会是1开头，这样生成的是正式比特币网站上的地址。
 
-![](media/f29e79d2720b834cec42e5d44682df8a.png)
+<img src="https://github.com/yuuu218/Innovation-pioneering/blob/main/image/R8.png?raw=true"  height="500" width="500">
 
 2、之后，我们需要获得部分比特币来完成比特币传输发送以及花费这一过程，在（<https://coinfaucet.eu/en/btc-testnet/> ）这个网址中来获得部分比特币（0.01533088），这一部分比特币是付给矿工的费用。
 
-![](media/29db023e457efd11d8b63ec26dbeb688.png)
+<img src="https://github.com/yuuu218/Innovation-pioneering/blob/main/image/R9.png?raw=true"  height="500" width="500">
 
 1.  我们在一个网站Testnet Blockchain中注册一个testnet钱包，进入之后输入我们上面生成的私钥，之后显示出我们的整个过程。
 
