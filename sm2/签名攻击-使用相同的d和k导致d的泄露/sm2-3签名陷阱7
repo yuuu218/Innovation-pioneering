@@ -1,0 +1,75 @@
+/*相同的d和k,导致d的泄露*/
+long gcd(long a, long b)
+{
+	while (a != b)
+	{
+		if (a > b)
+		{
+			a = a - b;
+		}
+		else
+		{
+			b = b - a;
+		}
+	}
+	return a;
+}
+long ExGcd(long a, long b, long& x, long& y) {
+	if (!b)
+	{
+		x = 1;
+		y = 0;
+		return a;
+	}
+	long ans = ExGcd(b, a % b, x, y);
+	long temp = x;
+	x = y;
+	y = temp - a / b * y;
+	return ans;
+}
+long getInverse(long a, long p)//a模n的乘法逆元
+{
+	if (gcd(a, p) != 1)
+		return -1;
+	long x, y;
+	ExGcd(a, p, x, y);
+	return (x + p) % p;
+}
+/*ECDSA*
+s1*k=(e+d*r1)
+s2*k=(e+d*r2)
+=>d=(e*s2-e*s1)/(r2*s1-r1*s2,n)
+*/
+d=((e*s2-e*s1)*getInverse(r2*s1-r1*s2,n))%n;
+
+/*Schnorr
+d*Hash(m1||R)=s1-k;
+d*Hash(m2||R)=s2-k;
+=>d=(s1-s2)/(Hash(m1||R)-Hash(m2||R))
+*/
+d=(s1-s2)*getInverse((Hash(m1||R)-Hash(m2||R),n)%n;
+
+/*SM2
+d*r1=k*s1-e1
+d(s2+r2)=k-s2
+消去k =>d=(s1s2-e1)/r1-s1s2-s1r2)*/
+def same_d_k():
+    IDA1 = 'ALICE123@YAHOO.COM'
+    M1 = 'message digest'
+    IDA2 = 'BOB123@YAHOO.COM'
+    M2 = 'practice'
+    dA = 0x128B2FA8BD433C6C068C8D803DFF79792A519A55171B1B650C23661D15897263
+    xA = 0x0AE4C7798AA0F119471BEE11825BE46202BB79E2A5844495E97C04FF4DF2548A
+    yA = 0x7C0240F88F1CD4E16352A73C17B7F16F07353E53A176D684A9FE0C6BB798E857
+    n = 0x8542D69E4C044F18E8B92435BF6FF7DD297720630485628D5AE74EE7C32E79B7
+    PA = (xA, yA)
+    k = 0x6CB28D99385C175C94F94E934817663FC176D925DD72B727260DBAAE1FB2F96F
+    # A、B双方初始化
+    sm2_A1 = SM2(*demo_para(), IDA1, dA, PA)
+    sm2_B1 = SM2(*demo_para())
+    r1, s1, e1 = sm2_A1.sign(M1, k, 0, )
+    sm2_A2 = SM2(*demo_para(), IDA2, dA, PA)
+    sm2_B2 = SM2(*demo_para())
+    r2, s2, e2 = sm2_A1.sign(M2, k, 0, )
+    d = ((s2 - s1) * get_inverse(s1 - s2 + r1 - r2, n)) % n;
+    print("d为：",hex(d))
