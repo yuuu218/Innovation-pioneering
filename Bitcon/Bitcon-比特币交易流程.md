@@ -8,7 +8,7 @@
 
 常见类型的比特币交易对应的两种脚本类型如下：
 
-![11](media/fdd53f5a490bc647321b8ab12277cbd5.png)
+<img src="https://github.com/yuuu218/Innovation-pioneering/blob/main/image/R11.png?raw=true"  height="200" width="400">
 
 UTXO：未花费的交易输出，它是比特币世界里的抽象货币，每个UTXO都被一个公钥(钱包地址)锁定，只有持有该公钥对应私钥的人，可以通过私钥签名(解锁)并使用该UTXO。可以把UTXO理解为抽象的纸币，但它的面值不是固定的。
 
@@ -22,11 +22,11 @@ UTXO：未花费的交易输出，它是比特币世界里的抽象货币，每�
 
 比特币脚本语言被称为基于堆栈语言，因为它使用的数据结构被称为堆栈。堆栈可以被理解成为一堆卡片。一个堆栈允许两类操作：推送和弹出。脚本语言通过从左往右处理每个项目的方式执行脚本。数字（常数）被推送至堆栈，操作符向堆栈推送（或移除）一个或多个参数，对它们进行处理，甚至可能会向堆栈推送一个结果。
 
-![12](media/06065c379e7f9669b503bb562f34ae40.png)
+<img src="https://github.com/yuuu218/Innovation-pioneering/blob/main/image/R12.png?raw=true"  height="500" width="400">
 
 比如说如下图中验证软件将锁定和解锁脚本组合起来：
 
-![13](media/64013e4b973417773d7799b72f5aa680.png)
+<img src="https://github.com/yuuu218/Innovation-pioneering/blob/main/image/R13.png?raw=true"  height="100" width="400">
 
 当脚本被执行时，结果是OP_TRUE，从而使得交易有效。不仅该笔交易的输出锁定脚本有效，同时UTXO也能被任何知晓这个运算技巧（知道数字是2）的人所使用。
 
@@ -38,7 +38,7 @@ UTXO：未花费的交易输出，它是比特币世界里的抽象货币，每�
 
 在P2SH中，复杂的锁定脚本被哈希函数取代，当一笔交易试图支付UTXO时，要解锁支付脚本，它必须含有与哈希相匹配的脚本。P2SH脚本示例如下：
 
-![14](media/83d135e2bbf670c38c5d17da6296a344.png)
+<img src="https://github.com/yuuu218/Innovation-pioneering/blob/main/image/R14.png?raw=true"  height="100" width="400">
 
 P2SH的另一重要特征是它能将脚本哈希编译为一个地址，P2SH地址是基于Base58编码的一个含有20个字节哈希的脚本，就像比特币地址是基于Base58编码的一个含有20个字节的公钥。由于P2SH地址采用5作为前缀，这导致基于Base58编码的地址以“3”开头。
 
