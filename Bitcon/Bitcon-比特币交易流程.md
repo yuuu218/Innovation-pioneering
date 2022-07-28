@@ -22,7 +22,7 @@ UTXO：未花费的交易输出，它是比特币世界里的抽象货币，每�
 
 比特币脚本语言被称为基于堆栈语言，因为它使用的数据结构被称为堆栈。堆栈可以被理解成为一堆卡片。一个堆栈允许两类操作：推送和弹出。脚本语言通过从左往右处理每个项目的方式执行脚本。数字（常数）被推送至堆栈，操作符向堆栈推送（或移除）一个或多个参数，对它们进行处理，甚至可能会向堆栈推送一个结果。
 
-<img src="https://github.com/yuuu218/Innovation-pioneering/blob/main/image/R12.png?raw=true"  height="500" width="400">
+<img src="https://github.com/yuuu218/Innovation-pioneering/blob/main/image/R12.png?raw=true"  height="300" width="400">
 
 比如说如下图中验证软件将锁定和解锁脚本组合起来：
 
