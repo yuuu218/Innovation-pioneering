@@ -1,0 +1,37 @@
+Verify the above pitfalls with proof-of-conceptcode
+
+/* 4、延展性攻击
+比特币的区块链如何保证一个交易有效并且不被修改：
+每个交易都必须签名才能花费输入（UTXO）；
+所有交易的哈希以Merkle Tree计算并存储到区块头。
+假设有一个输入和一个输出，它类似：tx = … input#index … signature … output-script …
+而整个交易的哈希可直接根据交易本身计算：tx-hash = dhash(tx)
+因为只有私钥持有人才能正确地签名，所以，只要签名是有效的，tx本身就应该固定下来。
+但问题出在签名算法上。ECDSA签名算法基于私钥计算的签名实际上是两个整数，记作(r, s)，但由于椭圆曲线的对称性，(r, -s mod N)实际上也是一个有效的签名（N是椭圆曲线的固定参数之一）。换句话说，对某个交易进行签名，总是可以计算出两个有效的签名，并且这两个有效的签名还可以互相计算出来。
+黑客可以在某一笔交易发出但并未落块的时间内，对签名进行修改，使之仍是一个有效的交易。注意黑客并无法修改任何输入输出的地址和金额，仅能修改签名。但由于签名的修改，使得整个交易的哈希被改变了。如果修改后的交易先被打包，虽然原始交易会被丢弃，且并不影响交易安全，但这个延展性攻击可用于攻击交易所。*/
+/* ECDSA */
+R=k*G[0]%n;
+R_2=e*w*G[0]+r*w*P[0];
+If(R==R_2)
+Return true;
+
+/* SM2 */
+def Malleability():
+    IDA = 'ALICE123@YAHOO.COM'
+    M = 'message digest'
+    dA = 0x128B2FA8BD433C6C068C8D803DFF79792A519A55171B1B650C23661D15897263
+    xA = 0x0AE4C7798AA0F119471BEE11825BE46202BB79E2A5844495E97C04FF4DF2548A
+    yA = 0x7C0240F88F1CD4E16352A73C17B7F16F07353E53A176D684A9FE0C6BB798E857
+    n = 0x8542D69E4C044F18E8B92435BF6FF7DD297720630485628D5AE74EE7C32E79B7
+    PA = (xA, yA)
+    k = 0x6CB28D99385C175C94F94E934817663FC176D925DD72B727260DBAAE1FB2F96F
+    # A、B双方初始化
+    sm2_A = SM2(*demo_para(), IDA, dA, PA)
+    sm2_B = SM2(*demo_para())
+    r, s, e = sm2_A.sign(M, k, 0, )
+    keysize = len(to_byte(n))
+    sig1=to_byte((r, s), keysize)
+    sig2 = to_byte((r, (-s)%n), keysize)
+    res1 = sm2_B.verify(M, sig1, IDA, PA)
+    res2 = sm2_B.verify(M, sig2, IDA, PA)
+    print(res1,res2)
