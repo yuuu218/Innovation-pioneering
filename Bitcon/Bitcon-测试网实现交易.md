@@ -8,14 +8,14 @@
 
 <img src="https://github.com/yuuu218/Innovation-pioneering/blob/main/image/R9.png?raw=true"  height="500" width="500">
 
-1.  我们在一个网站Testnet Blockchain中注册一个testnet钱包，进入之后输入我们上面生成的私钥，之后显示出我们的整个过程。
+3、我们在一个网站Testnet Blockchain中注册一个testnet钱包，进入之后输入我们上面生成的私钥，之后显示出我们的整个过程。
 
 ![](media/ff121f9a225cd9b5d1c37db6898a6bb7.png)
 
 该过程便是由33.08254925的比特币，将其中的33.06706889比特币发送给一个用户，另外剩下的0.01533088比特币便是付给矿工的费用
 
-1.  对应的源码为：
-
+4、对应的源码为：
+···[c]
 {
 
 "address": "n1sH2xFSFAWbU9WL3rTi5xxCAmC1bEihmh",
@@ -283,3 +283,4 @@
 ]
 
 }
+```
