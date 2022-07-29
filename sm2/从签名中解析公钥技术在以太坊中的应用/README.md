@@ -29,7 +29,7 @@
 签名过程如下：  
  ![image](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/sm2_1.png))  
 推导过程如下：  
- 
+ ![image](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/sm2_2.png))  
 三、完成人：于晓畅  
 四、项目代码说明  
   本项目为在已知签名的情况下推导公钥，故利用了项目二实现的sm2签名及验签，再加上def pk_fron_signature()函数，共同构成了本项目的完整代码。  
@@ -37,8 +37,8 @@
 
 五、运行指导：利用PyCharm在安装了所需模块的前提下直接run即可  
 六、运行截图  
- 
+ ![image](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/sm2_3.png))    
 与设置的公钥进行对比：  
- 
+ ![image](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/sm2_4.png))    
 其中PA为公钥，对比发现一致。  
 
