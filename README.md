@@ -1,7 +1,7 @@
 ### 一、小组成员    
 于晓畅  账户名称：yuuu218  
 张琴心  账户名称：  
-王婧涵  账户名称：  
+王婧涵  账户名称：hanhan-up
 李金源  账户名称：asdfljyy<br>
 ### 二、项目说明  
 关于每个项目的简介、完成人、代码说明、运行指导、结果截图、成员贡献说明及贡献值排序（贡献说明从上到下贡献值排序依次降低），由于篇幅问题将这些内容分别放入每个具体项目的readme文件中，
@@ -20,7 +20,8 @@
 (7)实现SM2 2P签名及验证:  (https://github.com/yuuu218/Innovation-pioneering/blob/main/sm2/README/README7.md)    
 (8)实现SM2 2P解密: (https://github.com/yuuu218/Innovation-pioneering/blob/main/sm2/README/README8.md)   
 #### 3、bitcon:  
-
+完成关于比特币的交易和进行数字签名的流程以及比特币测试网下比特币的交易和伪造数字签名的过程。
+（https://github.com/yuuu218/Innovation-pioneering/blob/main/Bitcon/README.md）
 
 #### 4、MPT<br>
 完成关于MPT的研究报告,包括前期介绍、设计原理、源码分析三部分。<br>
@@ -39,7 +40,9 @@
 实现SM2 2P签名及验证  
 实现SM2 2P解密  
 ##### （3）
-
+比特币交易和数字签名的流程
+比特币测试网模拟比特币交易
+伪造数字签名假装你是中本聪
 ##### （4）MPT<br>
 完成关于MPT的研究报告<br>
 #### 2、未完成的项目  
