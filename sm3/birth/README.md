@@ -1,4 +1,4 @@
-# 生日攻击
+# 项目：生日攻击
 
 ## 哈希碰撞
 
@@ -118,6 +118,10 @@ $$
 2. 求出相应的tag
 3. 寻找是否有碰撞，没有则返回步骤1
 
+## 运行指导
+
+直接在C++编译器和pyhton环境运行
+
 ## python 运行结果
 
 8 bit:
@@ -137,6 +141,10 @@ $$
 ![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/z6.png?raw=true)
 
 cpp文件运行结果不成功
+
+## 完成人
+
+李金源
 
 ## 参考文献
 
