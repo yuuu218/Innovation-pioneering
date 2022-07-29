@@ -32,9 +32,9 @@
 <img src="https://github.com/yuuu218/Innovation-pioneering/blob/main/image/R10.png?raw=true"  height="200" width="600">
 第二问伪造数字签名中：
 代码截图：
-![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/R6.png?raw=true)
+<img src="https://github.com/yuuu218/Innovation-pioneering/blob/main/image/R6.png?raw=true"  height="400" width="400">
 运行结果截图：
-![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/R7.png?raw=true)
+<img src="https://github.com/yuuu218/Innovation-pioneering/blob/main/image/R7.png?raw=true"  height="400" width="400">
 ## 七、具体贡献说明
 王婧涵：实现伪造数字签名来假装是中本聪
 李金源：实现比特网交易流程原理的说明
