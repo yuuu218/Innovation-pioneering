@@ -1,4 +1,4 @@
-# 长度扩展攻击
+# 项目：长度扩展攻击
 
 长度扩展攻击（length extension attack），是指针对某些允许包含额外信息的加密散列函数的攻击手段。对于满足以下条件的散列函数，都可以作为攻击对象：  
 
@@ -12,7 +12,7 @@
 
 这个结构的好处是，如果压缩函数是抗碰撞的，那经过此结构处理后的散列函数也是抗碰撞的。SM3，HMAC就是基于这种结构，因为Merkle-Damgard结构并不能抵抗扩展攻击，因此HMAC引入了Key。
 
-# 长度扩展攻击实现
+## 长度扩展攻击实现
 
 1. 选择a，首先对其进行填充，得到 m=a||fillFunction；
 2. 计算哈希值即 x1=hash(m,IV)；
@@ -20,23 +20,31 @@
 4. x3=hash(b,iv)，其中iv=x1；
 5. 如果x2与x3相同，攻击成功。
 
-# sm3
+## 运行指导
 
-## C++运行结果
+直接在C++编译器和python环境下运行
+
+## sm3
+
+### C++运行结果
 
    ![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/tu1.png?raw=true)
 
-## python运行结果
+### python运行结果
 
    ![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/tu3.png?raw=true)
 
-# md5
+## md5
 
    ![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/tu4.png?raw=true)
 
-# sha1
+## sha1
 
    ![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/tu5.png?raw=true)
+
+## 完成人
+
+王婧涵
 
 ## 参考文献
 
