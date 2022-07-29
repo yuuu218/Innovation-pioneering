@@ -27,7 +27,7 @@
 4、从签名推导公钥
 签名后的交易发送到以太坊节点后，节点需要从签名交易中还原出公钥(从公钥中单向计算出账号地址)，进而将交易放入交易池中。
 签名过程如下：
- 
+ ![image](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/image.png)
 推导过程如下：
  
 三、完成人：于晓畅
