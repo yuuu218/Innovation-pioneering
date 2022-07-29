@@ -118,6 +118,14 @@ abcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcd;
 
 使用SIMD极大的提高了效率。
 
+# 运行指导
+
+直接在C++编译器和python环境下运行
+
+# 完成人
+
+张琴心
+
 # 参考文献
 
 [SM3加密算法详解（2021-12-8）](https://blog.csdn.net/qq_40662424/article/details/121637732 )
