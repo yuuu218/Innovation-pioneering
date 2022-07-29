@@ -15,7 +15,7 @@
 (2)利用RFC6979实现SM2算法:   (https://github.com/yuuu218/Innovation-pioneering/blob/main/sm2/README/README2.md)  
 (3)签名攻击-泄露k导致泄露d:  (https://github.com/yuuu218/Innovation-pioneering/blob/main/sm2/README/README3.md)  
 (4)签名攻击-重用k导致泄露d:  (https://github.com/yuuu218/Innovation-pioneering/blob/main/sm2/README/README4.md)  
-(5)签名攻击-延展性攻击:  ()
+(5)签名攻击-延展性攻击:  (https://github.com/yuuu218/Innovation-pioneering/blob/main/sm2/README/README5.md)  
 (6)签名攻击-使用相同的d和k导致d的泄露:  
 (7)实现SM2 2P签名及验证:  
 (8)实现SM2 2P解密:  
