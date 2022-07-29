@@ -18,7 +18,7 @@
 (5)签名攻击-延展性攻击:  (https://github.com/yuuu218/Innovation-pioneering/blob/main/sm2/README/README5.md)  
 (6)签名攻击-使用相同的d和k导致d的泄露:  (https://github.com/yuuu218/Innovation-pioneering/blob/main/sm2/README/README6.md)  
 (7)实现SM2 2P签名及验证:  (https://github.com/yuuu218/Innovation-pioneering/blob/main/sm2/README/README7.md)    
-(8)实现SM2 2P解密: () 
+(8)实现SM2 2P解密: (https://github.com/yuuu218/Innovation-pioneering/blob/main/sm2/README/README8.md)   
 #### 3、bitcon:  
 
 
