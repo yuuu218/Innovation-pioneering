@@ -30,7 +30,7 @@
  ![image](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/sm2_1.png))  
 推导过程如下：  
  ![image](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/sm2_2.png))  
-三、完成人：于晓畅  
+三、完成人：于晓畅、王婧涵    
 四、项目代码说明  
   本项目为在已知签名的情况下推导公钥，故利用了项目二实现的sm2签名及验签，再加上def pk_fron_signature()函数，共同构成了本项目的完整代码。  
   为实现椭圆曲线的运算，需要一些基本的函数，如素数检测、字节和int的转换、求最大公约数、求乘法逆元等，本代码的前面部分实现了这些基础函数。其后定义了椭圆曲线密码类，用以实现一般的ECC运算：加法、乘法、求反等。再然后定义了SM2类继承ECC，实现SM2算法的签名、验签等。最后是与本项目直接相关的从签名推导公钥的函数，利用了项目说明里的推导过程，得出推导式后代码实现之。  
@@ -41,4 +41,6 @@
 与设置的公钥进行对比：  
  ![image](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/sm2_4.png))    
 其中PA为公钥，对比发现一致。  
-
+七、具体贡献说明  
+于晓畅：完成代码  
+王婧涵：搜集资料  
