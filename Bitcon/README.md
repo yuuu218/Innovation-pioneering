@@ -36,6 +36,9 @@
 运行结果截图：
 <img src="https://github.com/yuuu218/Innovation-pioneering/blob/main/image/R7.png?raw=true"  height="350" width="600">
 ## 七、具体贡献说明
+
 王婧涵：实现伪造数字签名来假装是中本聪
+
 李金源：实现比特网交易流程原理的说明
+
 张琴心：实现比特币测试网处比特币的交易
