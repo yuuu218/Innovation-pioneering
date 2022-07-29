@@ -1,8 +1,9 @@
-# 方法一
+#SM3 Rho
+## 方法一
 
 从一个初始值a出发，a=f(a),不断计算SM3值，就可能成环（前n bit)
 
-## python运行结果
+### python运行结果
 
 f=2x+1
 
@@ -30,7 +31,7 @@ f=2x+1
 
 ![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/28.png?raw=true)
 
-# 方法二
+## 方法二
 
 从一个初始值出发，a=sm3(a),不断计算SM3值，就可能成环（前n bit)
 
@@ -54,7 +55,7 @@ f=2x+1
 
 
 
-## C++运行结果
+### C++运行结果
 
 8bit:
 
@@ -75,3 +76,11 @@ f=2x+1
 24bit:
 
 ![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/cpp24.png?raw=true)
+
+## 运行指导
+
+直接在C++编译器和python环境下运行
+
+##完成人
+
+李金源
