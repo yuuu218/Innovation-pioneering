@@ -13,8 +13,8 @@
 #### 2、sm2:  
 (1)从签名中解析公钥技术在以太坊中的应用: (https://github.com/yuuu218/Innovation-pioneering/blob/main/sm2/README/README1.md)    
 (2)利用RFC6979实现SM2算法:   (https://github.com/yuuu218/Innovation-pioneering/blob/main/sm2/README/README2.md)  
-(3)签名攻击-泄露k导致泄露d:  ()
-(4)签名攻击-重用k导致泄露d:  
+(3)签名攻击-泄露k导致泄露d:  (https://github.com/yuuu218/Innovation-pioneering/blob/main/sm2/README/README3.md)
+(4)签名攻击-重用k导致泄露d:  ()
 (5)签名攻击-延展性攻击:  
 (6)签名攻击-使用相同的d和k导致d的泄露:  
 (7)实现SM2 2P签名及验证:  
