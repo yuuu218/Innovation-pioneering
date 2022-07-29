@@ -1,4 +1,4 @@
-# Merkle Tree
+# 项目 ：Merkle Tree
 
 ## Hash
 
@@ -50,6 +50,10 @@ Merkle Tree和Hash List的主要区别是，可以直接下载并立即验证Mer
 
 ![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/m1.png?raw=true)
 
+## 运行指导
+
+直接在C++编译器上运行
+
 ## 运行结果
 
 ### sha256
@@ -63,6 +67,10 @@ Merkle Tree和Hash List的主要区别是，可以直接下载并立即验证Mer
 ### sm3
 
 ![](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/m2.png?raw=true)
+
+## 完成人
+
+于晓畅
 
 ## 参考文献
 
