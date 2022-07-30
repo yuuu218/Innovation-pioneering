@@ -27,9 +27,9 @@
 #### 4、从签名推导公钥  
 签名后的交易发送到以太坊节点后，节点需要从签名交易中还原出公钥(从公钥中单向计算出账号地址)，进而将交易放入交易池中。  
 签名过程如下：  
- ![image](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/sm2_1.png))  
+ ![image](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/sm2_1.png)
 推导过程如下：  
- ![image](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/sm2_2.png))  
+ ![image](https://github.com/yuuu218/Innovation-pioneering/blob/main/image/sm2_2.png) 
 ### 三、完成人：于晓畅、王婧涵    
 ### 四、项目代码说明  
   本项目为在已知签名的情况下推导公钥，故利用了项目二实现的sm2签名及验签，再加上def pk_fron_signature()函数，共同构成了本项目的完整代码。  
