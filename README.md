@@ -1,6 +1,6 @@
 ### 一、小组成员    
 于晓畅  账户名称：yuuu218  
-张琴心  账户名称：  
+张琴心  账户名称：JoeyZhang12138
 王婧涵  账户名称：hanhan-up  
 李金源  账户名称：asdfljyy<br>
 ### 二、项目说明  
@@ -11,20 +11,20 @@
 (2)
 ...
 #### 2、sm2:  
-(1)从签名中解析公钥技术在以太坊中的应用: (https://github.com/yuuu218/Innovation-pioneering/blob/main/sm2/README/README1.md)    
-(2)利用RFC6979实现SM2算法:   (https://github.com/yuuu218/Innovation-pioneering/blob/main/sm2/README/README2.md)  
-(3)签名攻击-泄露k导致泄露d:  (https://github.com/yuuu218/Innovation-pioneering/blob/main/sm2/README/README3.md)  
-(4)签名攻击-重用k导致泄露d:  (https://github.com/yuuu218/Innovation-pioneering/blob/main/sm2/README/README4.md)  
-(5)签名攻击-延展性攻击:  (https://github.com/yuuu218/Innovation-pioneering/blob/main/sm2/README/README5.md)  
-(6)签名攻击-使用相同的d和k导致d的泄露:  (https://github.com/yuuu218/Innovation-pioneering/blob/main/sm2/README/README6.md)  
-(7)实现SM2 2P签名及验证:  (https://github.com/yuuu218/Innovation-pioneering/blob/main/sm2/README/README7.md)    
-(8)实现SM2 2P解密: (https://github.com/yuuu218/Innovation-pioneering/blob/main/sm2/README/README8.md)   
+(1)[从签名中解析公钥技术在以太坊中的应用](https://github.com/yuuu218/Innovation-pioneering/blob/main/sm2/README/README1.md)    
+(2)[利用RFC6979实现SM2算法](https://github.com/yuuu218/Innovation-pioneering/blob/main/sm2/README/README2.md)  
+(3)[签名攻击-泄露k导致泄露d](https://github.com/yuuu218/Innovation-pioneering/blob/main/sm2/README/README3.md)  
+(4)[签名攻击-重用k导致泄露d](https://github.com/yuuu218/Innovation-pioneering/blob/main/sm2/README/README4.md)  
+(5)[签名攻击-延展性攻击](https://github.com/yuuu218/Innovation-pioneering/blob/main/sm2/README/README5.md)  
+(6)[签名攻击-使用相同的d和k导致d的泄露](https://github.com/yuuu218/Innovation-pioneering/blob/main/sm2/README/README6.md)  
+(7)[实现SM2 2P签名及验证](https://github.com/yuuu218/Innovation-pioneering/blob/main/sm2/README/README7.md)    
+(8)[实现SM2 2P解密](https://github.com/yuuu218/Innovation-pioneering/blob/main/sm2/README/README8.md)   
 #### 3、bitcon:  
-完成关于比特币的交易和进行数字签名的流程以及比特币测试网下比特币的交易和伪造数字签名的过程。
-（https://github.com/yuuu218/Innovation-pioneering/blob/main/Bitcon/README.md）
+[完成关于比特币的交易和进行数字签名的流程以及比特币测试网下比特币的交易和伪造数字签名的过程]
+(https://github.com/yuuu218/Innovation-pioneering/blob/main/Bitcon/README.md)
 
 #### 4、MPT<br>
-完成关于MPT的研究报告,包括前期介绍、设计原理、源码分析三部分。<br>
+[完成关于MPT的研究报告,包括前期介绍、设计原理、源码分析三部分。]<br>
 (https://github.com/yuuu218/Innovation-pioneering/blob/main/MPT/README.md)<br>
 ### 三、清单  
 #### 1、已完成的项目  
